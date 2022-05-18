@@ -30,6 +30,15 @@
                                    (byte-array  (map #(Integer/parseInt %)
                                                      (take size binary-array))))))))
 
+(defn entropy-string->entropy-byte-array
+  "Turn an entropy string into entropy byte array"
+  [entropy-string]
+  (->> entropy-string
+       (#(clojure.string/split % #""))
+       (partition 2)
+       (map (fn [a] (reduce #(str %1 %2) a)))
+       (map #(Integer/parseInt % 16))))
+
 (defn seed-phrase->entropy
   "Turn a seed phrase into an intropy byte array"
   [seed-phrase]
