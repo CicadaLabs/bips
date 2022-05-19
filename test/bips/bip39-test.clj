@@ -1,9 +1,25 @@
 (ns cicadabank.proposals.bip39-test
   (:require
     [cicadabank.monero.wallet :refer [create-wallet-from-bip39-seed]]
-    [cicadabank.proposals.bip39 :refer [entropy-binary->mnemonic mnemonic->seed]]
+    [cicadabank.proposals.bip39 :refer [check-mnemonic
+                                        entropy-binary->mnemonic
+                                        mnemonic->seed]]
     [cicadabank.proposals.utils :refer [entropy->binary random-bits entropy-string->entropy-byte-array]]
     [clojure.test :refer [deftest is]]))
+
+(deftest can-detect-invalid-mnemonic
+  (is (not (check-mnemonic "this is an invalid seed")))
+  (is (not (check-mnemonic "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon test")))
+  (is (not (check-mnemonic "useful glare domain draw begin outer record fix essence immense want defy")))
+  (is (not (check-mnemonic "purpose seven minute hurry supply enlist snow guide much addict dial journey start build debate")))
+  (is (not (check-mnemonic "brain model pact ostrich hospital uphold track glass blossom clerk popular crunch run drive visit bus mean syrup")))
+  (is (not (check-mnemonic "share fury series transfer siren crush weasel blossom game glare author river dirt north mention glance split puzzle doll home coyote")))
+  (is (not (check-mnemonic "clip blame assume hold label rocket supply buzz diary short flag flavor maze live cross hour renew filter ankle scissors secret trumpet planet fatal")))
+  (is (not (check-mnemonic "depart alpha dial coach small patch fee grass brief boat quality label oyster much drop stock oxygen catalog sting choice response black gasp later draw"))))
+
+(deftest can-detect-valid-mnemonic
+  (is (check-mnemonic "crop cash unable insane eight faith inflict route frame loud box vibrant"))
+  (is (check-mnemonic "giggle load civil velvet legend drink letter symbol vivid tube parent plug accuse fault choose ahead bomb make novel potato enrich honey cable exchange")))
 
 (deftest can-generate-seed-phrase-from-128-bits-entropy
   (is (= "Wallet has been generated successfully."
@@ -58,7 +74,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-2
   (let [entropy "7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f"
@@ -70,7 +87,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-3
   (let [entropy "80808080808080808080808080808080"
@@ -82,7 +100,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-4
   (let [entropy "ffffffffffffffffffffffffffffffff"
@@ -94,7 +113,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-5
   (let [entropy "000000000000000000000000000000000000000000000000"
@@ -106,7 +126,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-6
   (let [entropy "7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f"
@@ -118,7 +139,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-7
   (let [entropy "808080808080808080808080808080808080808080808080"
@@ -130,7 +152,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-8
   (let [entropy "ffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -142,7 +165,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-9
   (let [entropy "0000000000000000000000000000000000000000000000000000000000000000"
@@ -154,7 +178,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-10
   (let [entropy "7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f"
@@ -166,7 +191,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-11
   (let [entropy "8080808080808080808080808080808080808080808080808080808080808080"
@@ -178,7 +204,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-12
   (let [entropy "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -190,7 +217,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-13
   (let [entropy "9e885d952ad362caeb4efe34a8e91bd2"
@@ -202,7 +230,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-14
   (let [entropy "6610b25967cdcca9d59875f5cb50b0ea75433311869e930b"
@@ -214,7 +243,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-15
   (let [entropy "68a79eaca2324873eacc50cb9c6eca8cc68ea5d936f98787c60c7ebc74e6ce7c"
@@ -226,7 +256,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-16
   (let [entropy "c0ba5a8e914111210f2bd131f3d5e08d"
@@ -238,7 +269,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-17
   (let [entropy "6d9be1ee6ebd27a258115aad99b7317b9c8d28b6d76431c3"
@@ -250,7 +282,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-18
   (let [entropy "9f6a2878b2520799a44ef18bc7df394e7061a224d2c33cd015b157d746869863"
@@ -262,7 +295,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-19
   (let [entropy "23db8160a31d3e0dca3688ed941adbf3"
@@ -274,7 +308,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-20
   (let [entropy "8197a4a47f0425faeaa69deebc05ca29c0a5b5cc76ceacc0"
@@ -286,7 +321,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-21
   (let [entropy "066dca1a2bb7e8a1db2832148ce9933eea0f3ac9548d793112d9a95c9407efad"
@@ -298,7 +334,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-22
   (let [entropy "f30f8c1da665478f49b001d94c5fc452"
@@ -310,7 +347,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-23
   (let [entropy "c10ec20dc3cd9f652c7fac2f1230f7a3c828389a14392f05"
@@ -322,7 +360,8 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))
 
 (deftest test-vector-24
   (let [entropy "f585c11aec520db57dd353c69554b21a89b20fb0650966fa0a9d6f74fd989d8f"
@@ -334,4 +373,5 @@
              (entropy->binary
                (entropy-string->entropy-byte-array entropy)))))
     (is (= seed
-           (mnemonic->seed mnemonic passphrase)))))
+           (mnemonic->seed mnemonic passphrase)))
+    (is (check-mnemonic mnemonic))))

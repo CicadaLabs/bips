@@ -24,6 +24,24 @@
     (assert (= (.length (str/split seed-phrase #" ")) (nth seed-phrase-length (.indexOf entropy-sizes size))))
     seed-phrase))
 
+(defn check-mnemonic
+  "Check the validity of a mnemonic seed phrase.
+  Return true if the provided mnemonic is valid."
+  [mnemonic]
+  (let [words (str/split mnemonic #" ")]
+    (and (some #(= (count words) %)
+               (map #(/ % 11)
+                    (map + (range 128 (+ 1 256) 32)
+                         (map #(/ % 32) (range 128 (+ 1 256) 32)))))
+         (= (reduce #(str %1 %2)
+                    (take (* 11 (/ (count words) 33))
+                          (format "%08d" (Integer/parseInt
+                                           (Integer/toBinaryString (first (byte-array->digest (take (* 11 (* 32 (/ (count words) 33)))
+                                                                                                    (seed-phrase->binary-array mnemonic)))))))))
+            (reduce #(str %1 %2)
+                    (take-last (* 11 (/ (count words) 33))
+                               (seed-phrase->binary-array mnemonic)))))))
+
 (defn mnemonic->seed
   "Create a binary seed from the mnemonic"
   ([mnemonic]
