@@ -8,7 +8,10 @@
     [clojure.test :refer [deftest is]]))
 
 (deftest can-detect-invalid-mnemonic
-  (is (not (check-mnemonic "this is an invalid seed")))
+  (is (thrown-with-msg? Exception #"Language not detected."
+        (check-mnemonic "this is an invalid seed")))
+  (is (thrown-with-msg? Exception #"Language ambigous between .*"
+        (check-mnemonic "abandon")))
   (is (not (check-mnemonic "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon test")))
   (is (not (check-mnemonic "useful glare domain draw begin outer record fix essence immense want defy")))
   (is (not (check-mnemonic "purpose seven minute hurry supply enlist snow guide much addict dial journey start build debate")))

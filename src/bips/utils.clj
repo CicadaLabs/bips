@@ -1,13 +1,21 @@
 (ns cicadabank.proposals.utils
   (:require
     [clj-commons.digest :as digest]
+    [clojure.set]
     [clojure.string :as str])
   (:import
     org.apache.commons.codec.binary.Hex))
 
-(def bip39-dictionary
-  "BIP-39 English dictionary"
-  (-> "https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/english.txt"
+(def languages
+  ["chinese_simplified" "chinese_traditional" "czech" "english"
+   "french" "italian" "japanese" "portuguese" "spanish"])
+
+(defn bip39-dictionary
+  "Return the BIP-39 dictionary for the provided `language`"
+  [language]
+  (when (not (.contains languages language))
+    (throw (Exception. "Languaged not supported.")))
+  (-> (str "resources/assets/bip-39/" language ".txt")
       slurp
       (str/split #"\n")))
 
@@ -18,14 +26,14 @@
 
 (defn index-of
   "Return the index of word in the BIP-39 English dictionary"
-  [word] (count (take-while (partial not= word) bip39-dictionary)))
+  [word language] (count (take-while (partial not= word) (bip39-dictionary language))))
 
 (defn seed-phrase->binary-array
   "Turn a seed phrase into a binary array of ``0`` and ``1``"
-  [seed-phrase]
+  [seed-phrase language]
   (str/split (reduce #(str %1 %2)
                      (map #(format "%011d" (Long/parseLong (Integer/toBinaryString %)))
-                          (map #(index-of %) (str/split seed-phrase #" "))))
+                          (map #(index-of % language) (str/split seed-phrase #" "))))
              #""))
 
 (defn binary-array->byte-array
@@ -48,9 +56,9 @@
 
 (defn seed-phrase->entropy
   "Turn a seed phrase into an intropy byte array"
-  [seed-phrase]
+  [seed-phrase language]
   (map #(format "%x" %)
-       (binary-array->byte-array (seed-phrase->binary-array seed-phrase)
+       (binary-array->byte-array (seed-phrase->binary-array seed-phrase language)
                                  (-> seed-phrase
                                      (#(str/split % #" "))
                                      count
@@ -113,8 +121,31 @@
 
 (defn binary-with-digest->seed-phrase
   "Turn a seed phrase and its digest in binary form into seed phrase"
-  [binary-with-digest]
+  [binary-with-digest language]
   (let [seed-phrase-binary (map (fn [a] (reduce #(str %1 %2) a)) (partition 11 binary-with-digest))
         seed-phrase-dec (map #(Long/parseLong % 2) seed-phrase-binary)
-        seed-phrase (reduce #(str %1 " " %2) (map #(nth bip39-dictionary %) seed-phrase-dec))]
+        seed-phrase (reduce #(str %1 " " %2) (map #(nth (bip39-dictionary language) %) seed-phrase-dec))]
     seed-phrase))
+
+(defn detect-language
+  "Detect the language of a mnemonic"
+  [mnemonic]
+  (let [words (str/split mnemonic #" ")
+        possible (loop [langs languages
+                        v '()]
+                   (if (seq langs)
+                     (if (= (count (set words))
+                            (count (clojure.set/intersection
+                                     (set words)
+                                     (set (bip39-dictionary (first langs))))))
+                       (recur (rest langs)
+                              (conj v (first langs)))
+                       (recur (rest langs)
+                              v))
+                     v))]
+    (when (empty? possible)
+      (throw (Exception. "Language not detected.")))
+    (if (= 1 (count possible))
+      (first possible)
+      (throw (Exception. (str "Language ambigous between "
+                              (reduce #(str %1 ", " %2) possible)))))))
