@@ -1,13 +1,20 @@
 (ns cicadabank.proposals.utils
   (:require
     [clj-commons.digest :as digest]
-    [clojure.string :as str]))
+    [clojure.string :as str])
+  (:import
+    org.apache.commons.codec.binary.Hex))
 
 (def bip39-dictionary
   "BIP-39 English dictionary"
   (-> "https://raw.githubusercontent.com/bitcoin/bips/master/bip-0039/english.txt"
       slurp
       (str/split #"\n")))
+
+(defn bytes->hex
+  "Convert a byte array to hex encoded string."
+  [^bytes data]
+  (Hex/encodeHexString data))
 
 (defn index-of
   "Return the index of word in the BIP-39 English dictionary"
@@ -88,9 +95,9 @@
 (defn size->suffix-length
   "Return the suffix length from the size"
   [size]
-  (let [entropies [128 160 192 224 256]
-        suffix-length (map #(/ % 32) entropies)]
-    (nth suffix-length (.indexOf entropies size))))
+  (let [entropy-sizes [128 160 192 224 256]
+        suffix-length (map #(/ % 32) entropy-sizes)]
+    (nth suffix-length (.indexOf entropy-sizes size))))
 
 (defn checksum
   "Compute the checksum of a seed phrase from the size and the digest"
