@@ -31,9 +31,9 @@
 (defn seed-phrase->binary-array
   "Turn a seed phrase into a binary array of ``0`` and ``1``"
   [seed-phrase language]
-  (str/split (reduce #(str %1 %2)
-                     (map #(format "%011d" (Long/parseLong (Integer/toBinaryString %)))
-                          (map #(index-of % language) (str/split seed-phrase #" "))))
+  (str/split (apply str
+                    (map #(format "%011d" (Long/parseLong (Integer/toBinaryString %)))
+                         (map #(index-of % language) (str/split seed-phrase #" "))))
              #""))
 
 (defn binary-array->byte-array
@@ -51,7 +51,7 @@
   (->> entropy-string
        (#(clojure.string/split % #""))
        (partition 2)
-       (map (fn [a] (reduce #(str %1 %2) a)))
+       (map #(apply str %))
        (map #(Integer/parseInt % 16))))
 
 (defn seed-phrase->entropy
@@ -68,13 +68,13 @@
   "Turn an entropy byte array into a binary array of 0 and 1"
   [entropy]
   (map #(Integer/parseInt %) (clojure.string/split
-                               (reduce #(str %1 %2) (map #(format "%08d" (Integer/parseInt (Integer/toBinaryString %)))
-                                                         entropy)) #"")))
+                               (apply str (map #(format "%08d" (Integer/parseInt (Integer/toBinaryString %)))
+                                               entropy)) #"")))
 
 (defn binary->byte-binary
   "Turn a binary array into a byte array"
   [binary]
-  (map (fn [a] (reduce #(str %1 %2) a)) (partition 8 binary)))
+  (map #(apply str %) (partition 8 binary)))
 
 (defn random-bits
   "Return a random array of bits of size `size`"
@@ -110,7 +110,9 @@
 (defn checksum
   "Compute the checksum of a seed phrase from the size and the digest"
   [size digest]
-  (let [hash-suffix (clojure.string/split (apply str (take (size->suffix-length size) (format "%08d" (Integer/parseInt (Integer/toBinaryString (first digest)))))) #"")]
+  (let [hash-suffix (clojure.string/split (apply str (take (size->suffix-length size)
+                                                           (format "%08d" (Integer/parseInt
+                                                                            (Integer/toBinaryString (first digest)))))) #"")]
     hash-suffix))
 
 (defn binary+checksun->seed-phrase-binary
@@ -122,15 +124,20 @@
 (defn binary-with-digest->seed-phrase
   "Turn a seed phrase and its digest in binary form into seed phrase"
   [binary-with-digest language]
-  (let [seed-phrase-binary (map (fn [a] (reduce #(str %1 %2) a)) (partition 11 binary-with-digest))
+  (let [seed-phrase-binary (map #(apply str %) (partition 11 binary-with-digest))
         seed-phrase-dec (map #(Long/parseLong % 2) seed-phrase-binary)
-        seed-phrase (reduce #(str %1 " " %2) (map #(nth (bip39-dictionary language) %) seed-phrase-dec))]
+        seed-phrase (str/join (case language
+                                "japanese" "\u3000"
+                                " ")
+                              (map #(nth (bip39-dictionary language) %) seed-phrase-dec))]
     seed-phrase))
 
 (defn detect-language
   "Detect the language of a mnemonic"
   [mnemonic]
-  (let [words (str/split mnemonic #" ")
+  (let [words (str/split mnemonic (if (.contains mnemonic "\u3000")
+                                    #"\u3000"
+                                    #" "))
         possible (loop [langs languages
                         v '()]
                    (if (seq langs)
@@ -148,4 +155,4 @@
     (if (= 1 (count possible))
       (first possible)
       (throw (Exception. (str "Language ambigous between "
-                              (reduce #(str %1 ", " %2) possible)))))))
+                              (str/join ", " possible)))))))
