@@ -4,7 +4,8 @@
     [clojure.set]
     [clojure.string :as str])
   (:import
-    org.apache.commons.codec.binary.Hex))
+    java.security.SecureRandom
+    org.bouncycastle.crypto.prng.BasicEntropySourceProvider))
 
 (def languages
   ["chinese_simplified" "chinese_traditional" "czech" "english"
@@ -18,11 +19,6 @@
   (-> (str "resources/assets/bip-39/" language ".txt")
       slurp
       (str/split #"\n")))
-
-(defn bytes->hex
-  "Convert a byte array to hex encoded string."
-  [^bytes data]
-  (Hex/encodeHexString data))
 
 (defn index-of
   "Return the index of word in the BIP-39 English dictionary"
@@ -68,7 +64,10 @@
   "Turn an entropy byte array into a binary array of 0 and 1"
   [entropy]
   (map #(Integer/parseInt %) (clojure.string/split
-                               (apply str (map #(format "%08d" (Integer/parseInt (Integer/toBinaryString %)))
+                               (apply str (map #(format "%08d" (Integer/parseInt
+                                                                 (apply str
+                                                                        (take-last 8
+                                                                                   (Integer/toBinaryString %)))))
                                                entropy)) #"")))
 
 (defn binary->byte-binary
@@ -76,10 +75,14 @@
   [binary]
   (map #(apply str %) (partition 8 binary)))
 
-(defn random-bits
-  "Return a random array of bits of size `size`"
+(defn random-entropy
+  "Return a random array of bytes of `size` bits"
   [size]
-  (byte-array (repeatedly size #(byte (rand-int 2)))))
+  (let [random (SecureRandom.)
+        provider (BasicEntropySourceProvider. random true)]
+    (-> provider
+        (.get size)
+        (.getEntropy))))
 
 (defn byte-binary->byte-array
   "Turn a binary array into a byte array"
