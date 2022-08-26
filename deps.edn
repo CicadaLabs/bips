@@ -4,7 +4,8 @@
   org.bouncycastle/bcprov-jdk15on {:mvn/version "1.69"},
   org.clj-commons/digest {:mvn/version "1.4.100"},
   org.bitcoinj/bitcoinj-core {:mvn/version "0.16.1"},
-  org.web3j/crypto {:mvn/version "5.0.0"}},
+  org.web3j/crypto {:mvn/version "5.0.0"},
+  org.clojure/math.numeric-tower {:mvn/version "0.0.5"}},
 
  :paths ["src/" "resources/"],
 
