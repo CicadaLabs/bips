@@ -33,3 +33,11 @@
                                         (format "%08x" i)))
                 {:key (codecs/hex->bytes c-par)
                  :alg :hmac+sha512}))))
+
+(defn CKDpub [K-par c-par i]
+  (if (>= i (math/expt 2 31))
+    nil
+    (mac/hash (codecs/hex->bytes (str K-par
+                                      (format "%08x" i)))
+              {:key (codecs/hex->bytes c-par)
+               :alg :hmac+sha512})))

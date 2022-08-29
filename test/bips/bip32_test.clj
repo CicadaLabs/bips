@@ -2,7 +2,7 @@
   (:require
     [buddy.core.codecs :as codecs]
     [buddy.core.hash :as hash]
-    [bips.bip32 :refer [derive-master-code CKDpriv]]
+    [bips.bip32 :refer [derive-master-code CKDpriv CKDpub]]
     [clojure.math.numeric-tower :as math]
     [clojure.test :refer [deftest is]])
   (:import
@@ -123,7 +123,21 @@
                                               (apply str (take (- 64 (count child-private-key)) (repeatedly #(identity "0"))))
                                               child-private-key))
         formatted-child-private-key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256
-                                                                           (byte-array (codecs/hex->bytes formatted-child-private-key)))))]
+                                                                           (byte-array (codecs/hex->bytes formatted-child-private-key)))))
+        Ip (CKDpub compressed-master-public-key master-chain-code 0)
+        Ki (.getEncoded (.add
+                          (Sign/publicPointFromPrivate (BigInteger. 1 (byte-array (take 32 Ip))))
+                          (Sign/publicPointFromPrivate (BigInteger. master-secret-key 16)))
+                        true)
+        ci (codecs/bytes->hex (byte-array (take-last 32 Ip)))
+        formatted-child-public-key (str "0488B21E"
+                                        "01"
+                                        (format "%x" fingerprint)
+                                        (format "%08x" 0)
+                                        ci
+                                        (codecs/bytes->hex Ki))
+        formatted-child-public-key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256
+                                                                          (byte-array (codecs/hex->bytes formatted-child-public-key)))))]
     (is (= "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U"
            (Base58/encode (codecs/hex->bytes (str private-key
                                                   (apply str (take 8 private-key-hash)))))))
@@ -132,4 +146,7 @@
                                                   (apply str (take 8 public-key-hash)))))))
     (is (= "xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt"
            (Base58/encode (codecs/hex->bytes (str formatted-child-private-key
-                                                  (apply str (take 8 formatted-child-private-key-hash)))))))))
+                                                  (apply str (take 8 formatted-child-private-key-hash)))))))
+    (is (= "xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9LgpeyGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH"
+           (Base58/encode (codecs/hex->bytes (str formatted-child-public-key
+                                                  (apply str (take 8 formatted-child-public-key-hash)))))))))
