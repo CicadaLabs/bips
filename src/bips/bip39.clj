@@ -1,7 +1,7 @@
-(ns cicadabank.proposals.bip39
+(ns bips.bip39
   (:require
+    [bips.utils :refer :all]
     [buddy.core.codecs :as codecs]
-    [cicadabank.proposals.utils :refer :all]
     [clojure.string :as str])
   (:import
     java.nio.charset.StandardCharsets

@@ -1,4 +1,4 @@
-(ns cicadabank.proposals.utils
+(ns bips.utils
   (:require
     [clj-commons.digest :as digest]
     [clojure.set]
@@ -17,7 +17,7 @@
   [language]
   (when (not (.contains languages language))
     (throw (Exception. "Languaged not supported.")))
-  (-> (str "resources/assets/bip-39/" language ".txt")
+  (-> (str "resources/" language ".txt")
       slurp
       (str/split #"\n")))
 
