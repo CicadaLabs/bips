@@ -60,15 +60,25 @@
                                      count
                                      (#(* % 11))))))
 
-(defn entropy->binary
+(def entropy->binary
   "Turn an entropy byte array into a binary array of 0 and 1"
-  [entropy]
-  (map #(Integer/parseInt %) (clojure.string/split
-                               (apply str (map #(format "%08d" (Integer/parseInt
-                                                                 (apply str
-                                                                        (take-last 8
-                                                                                   (Integer/toBinaryString %)))))
-                                               entropy)) #"")))
+  (fn*
+    ([entropy]
+     (map
+       #(. Integer parseInt %)
+       (str/split
+         (apply
+           str
+           (map
+             #(format
+                "%08d"
+                (. Integer
+                   parseInt
+                   (apply
+                     str
+                     (take-last 8 (. Integer toBinaryString %)))))
+             entropy))
+         #"")))))
 
 (defn binary->byte-binary
   "Turn a binary array into a byte array"
@@ -110,13 +120,24 @@
         suffix-length (map #(/ % 32) entropy-sizes)]
     (nth suffix-length (.indexOf entropy-sizes size))))
 
-(defn checksum
+(def checksum
   "Compute the checksum of a seed phrase from the size and the digest"
-  [size digest]
-  (let [hash-suffix (clojure.string/split (apply str (take (size->suffix-length size)
-                                                           (format "%08d" (Integer/parseInt
-                                                                            (Integer/toBinaryString (first digest)))))) #"")]
-    hash-suffix))
+  (fn*
+    ([size digest]
+     (let*
+       [hash-suffix
+        (str/split
+          (apply
+            str
+            (take
+              (size->suffix-length size)
+              (format
+                "%08d"
+                (. Integer
+                   parseInt
+                   (. Integer toBinaryString (first digest))))))
+          #"")]
+       hash-suffix))))
 
 (defn binary+checksun->seed-phrase-binary
   "Turn a random binary data and its checksum into seed phrase in binary form"

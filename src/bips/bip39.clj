@@ -43,14 +43,27 @@
                (map #(/ % 11)
                     (map + (range 128 (+ 1 256) 32)
                          (map #(/ % 32) (range 128 (+ 1 256) 32)))))
-         (= (apply str
-                   (take (* 11 (/ (count words) 33))
-                         (format "%08d" (Integer/parseInt
-                                          (Integer/toBinaryString (first (byte-array->digest (take (* 11 (* 32 (/ (count words) 33)))
-                                                                                                   (seed-phrase->binary-array mnemonic language)))))))))
-            (apply str
-                   (take-last (* 11 (/ (count words) 33))
-                              (seed-phrase->binary-array mnemonic language)))))))
+         (=
+           (apply
+             str
+             (take
+               (* 11 (/ (count words) 33))
+               (format
+                 "%08d"
+                 (. Integer
+                    parseInt
+                    (. Integer
+                       toBinaryString
+                       (first
+                         (byte-array->digest
+                           (take
+                             (* 11 (* 32 (/ (count words) 33)))
+                             (seed-phrase->binary-array mnemonic language)))))))))
+           (apply
+             str
+             (take-last
+               (* 11 (/ (count words) 33))
+               (seed-phrase->binary-array mnemonic language)))))))
 
 (defn mnemonic->seed
   "Create a binary seed from the mnemonic"
