@@ -44,21 +44,16 @@
                     (map + (range 128 (+ 1 256) 32)
                          (map #(/ % 32) (range 128 (+ 1 256) 32)))))
          (=
-           (apply
-             str
-             (take
-               (* 11 (/ (count words) 33))
-               (format
-                 "%08d"
-                 (. Integer
-                    parseInt
-                    (. Integer
-                       toBinaryString
-                       (first
-                         (byte-array->digest
-                           (take
-                             (* 11 (* 32 (/ (count words) 33)))
-                             (seed-phrase->binary-array mnemonic language)))))))))
+           (->> mnemonic
+                (#(seed-phrase->binary-array % language))
+                (take (* 11 (* 32 (/ (count words) 33))))
+                (byte-array->digest)
+                first
+                Integer/toBinaryString
+                Integer/parseInt
+                (format "%08d")
+                (take (* 11 (/ (count words) 33)))
+                (apply str))
            (apply
              str
              (take-last

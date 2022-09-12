@@ -67,9 +67,9 @@
   (->> entropy
        (map #(format "%08d"
                      (Integer/parseInt
-                      (apply str
-                             (take-last 8
-                                        (Integer/toBinaryString %))))))
+                       (apply str
+                              (take-last 8
+                                         (Integer/toBinaryString %))))))
        (apply str)
        (#(str/split % #""))
        (map #(Integer/parseInt %))))
