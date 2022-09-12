@@ -61,25 +61,18 @@
                                      count
                                      (#(* % 11))))))
 
-(def entropy->binary
+(defn entropy->binary
   "Turn an entropy byte array into a binary array of 0 and 1"
-  (fn*
-    ([entropy]
-     (map
-       #(. Integer parseInt %)
-       (str/split
-         (apply
-           str
-           (map
-             #(format
-                "%08d"
-                (. Integer
-                   parseInt
-                   (apply
-                     str
-                     (take-last 8 (. Integer toBinaryString %)))))
-             entropy))
-         #"")))))
+  [entropy]
+  (->> entropy
+       (map #(format "%08d"
+                     (Integer/parseInt
+                      (apply str
+                             (take-last 8
+                                        (Integer/toBinaryString %))))))
+       (apply str)
+       (#(str/split % #""))
+       (map #(Integer/parseInt %))))
 
 (defn binary->byte-binary
   "Turn a binary array into a byte array"
@@ -121,24 +114,18 @@
         suffix-length (map #(/ % 32) entropy-sizes)]
     (nth suffix-length (.indexOf entropy-sizes size))))
 
-(def checksum
+(defn checksum
   "Compute the checksum of a seed phrase from the size and the digest"
-  (fn*
-    ([size digest]
-     (let*
-       [hash-suffix
-        (str/split
-          (apply
-            str
-            (take
-              (size->suffix-length size)
-              (format
-                "%08d"
-                (. Integer
-                   parseInt
-                   (. Integer toBinaryString (first digest))))))
-          #"")]
-       hash-suffix))))
+  [size digest]
+  (clojure.string/split
+    (->> digest
+         first
+         Integer/toBinaryString
+         Integer/parseInt
+         (format "%08d")
+         (take (size->suffix-length size))
+         (apply str))
+    #""))
 
 (defn binary+checksun->seed-phrase-binary
   "Turn a random binary data and its checksum into seed phrase in binary form"
