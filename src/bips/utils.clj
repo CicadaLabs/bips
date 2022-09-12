@@ -12,7 +12,8 @@
    "french" "italian" "japanese" "portuguese" "spanish"])
 
 (defn bip39-dictionary
-  "Return the BIP-39 dictionary for the provided `language`"
+  "Return the BIP-39 dictionary for the provided `language`.
+  If the language is not available, an exception is thrown."
   [language]
   (when (not (.contains languages language))
     (throw (Exception. "Languaged not supported.")))
@@ -157,7 +158,8 @@
     seed-phrase))
 
 (defn detect-language
-  "Detect the language of a mnemonic"
+  "Detect the language of a mnemonic.
+  If no language is detected or if there is any ambiguity, an exception is thrown."
   [mnemonic]
   (let [words (str/split mnemonic (if (.contains mnemonic "\u3000")
                                     #"\u3000"
