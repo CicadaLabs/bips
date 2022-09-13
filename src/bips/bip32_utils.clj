@@ -5,7 +5,22 @@
   (:import
     (org.bitcoinj.core
       Base58
-      Utils)))
+      Utils)
+    (org.bouncycastle.asn1.x9
+      X9IntegerConverter)
+    (org.bouncycastle.crypto.ec
+      CustomNamedCurves)
+    (org.bouncycastle.crypto.params
+      ECDomainParameters)))
+
+(def CURVE_PARAMS (CustomNamedCurves/getByName "secp256k1"))
+
+(def CURVE
+  (new ECDomainParameters
+       (.getCurve CURVE_PARAMS)
+       (.getG CURVE_PARAMS)
+       (.getN CURVE_PARAMS)
+       (.getH CURVE_PARAMS)))
 
 (def version-bytes
   {:mainnet {:public "0488B21E"
@@ -46,3 +61,11 @@
             (bit-shift-left (bit-and (nth identifier 2) 0xFF) 8)
             (bit-shift-left (bit-and (nth identifier 1) 0xFF) 16)
             (bit-shift-left (bit-and (first identifier) 0xFF) 24))))
+
+(defn decompressKey [xBN yBit]
+  (let [x9 (new X9IntegerConverter)
+        compEnc (.integerToBytes x9 xBN (+ 1 (.getByteLength x9 (.getCurve CURVE))))]
+    (aset-byte compEnc 0 (if yBit
+                           0x02
+                           0x03))
+    (.decodePoint (.getCurve CURVE) compEnc)))

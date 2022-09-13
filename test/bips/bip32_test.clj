@@ -24,12 +24,16 @@
                                        16))
         public-key (serialize :mainnet :public 0 0 0
                               master-chain-code master-public-key)
-        child (CKDpriv master-secret-key master-chain-code (+ (math/expt 2 31) 0))
+        child (CKDpriv {:private-key master-secret-key
+                        :chain-code master-chain-code
+                        :index (+ (math/expt 2 31) 0)})
         fingerprint (key-fingerprint master-public-key)
         formatted-child-private-key (serialize :mainnet :private 1 fingerprint (math/expt 2 31)
                                                (:chain-code child)
                                                (:private-key child))
-        neutered (N (:private-key child) (:chain-code child) 1)
+        neutered (N {:private-key (:private-key child)
+                     :chain-code (:chain-code child)
+                     :index 1})
         formatted-neutered-child-public-key (serialize :mainnet :public 1 fingerprint (math/expt 2 31)
                                                        (:chain-code neutered)
                                                        (:public-key neutered))]
@@ -53,21 +57,22 @@
         master-point-public-key (Sign/publicPointFromPrivate
                                   (BigInteger. (apply str master-secret-key)
                                                16))
-        master-public-key (byte-array
-                            (take-last 64
-                                       (.getEncoded master-point-public-key false)))
+        master-public-key (.getEncoded master-point-public-key false)
         public-key (serialize :mainnet :public 0 0 0
                               master-chain-code
-                              master-public-key)
-        child (CKDpriv master-secret-key master-chain-code 0)
-        fingerprint (key-fingerprint master-public-key)
+                              (byte-array (take-last 64 master-public-key)))
+        child (CKDpriv {:private-key master-secret-key
+                        :chain-code master-chain-code
+                        :index 0})
+        fingerprint (key-fingerprint (byte-array (take-last 64 master-public-key)))
         formatted-child-private-key (serialize :mainnet :private 1 fingerprint 0
                                                (:chain-code child) (:private-key child))
-        childp (CKDpub master-point-public-key master-chain-code 0)
+        childp (CKDpub {:public-key (byte-array (take-last 64 master-public-key))
+                        :chain-code master-chain-code
+                        :index 0})
         formatted-child-public-key (serialize :mainnet :public 1 fingerprint 0
                                               (:chain-code childp)
-                                              (byte-array (take-last 64
-                                                                     (:public-key childp))))]
+                                              (byte-array (take-last 64 (:public-key childp))))]
     (is (= "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U"
            private-key))
     (is (= "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB"
