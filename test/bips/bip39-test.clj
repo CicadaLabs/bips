@@ -78,17 +78,17 @@
               (mnemonic->seed mnemonic# passphrase#)))
        (is (check-mnemonic mnemonic#)))))
 
-(doseq [tv test-vectors
-        i (range 1 (count test-vectors))]
-  (add-test (symbol (str "test-vector-" i))
-            (symbol (str *ns*))
-            (gen-test-vector (symbol (str "test-vector-" i)) tv)))
+(doseq [i (range 0 (count test-vectors))]
+  (let [tv (nth test-vectors i)]
+    (add-test (symbol (str "test-vector-" i))
+              (symbol (str *ns*))
+              (gen-test-vector (symbol (str "test-vector-" i)) tv))))
 
-(doseq [tv test-vectors-jp
-        i (range 1 (count test-vectors-jp))]
-  (add-test (symbol (str "test-vector-jp-" i))
-            (symbol (str *ns*))
-            (gen-test-vector-jp (symbol (str "test-vector-jp-" i)) tv)))
+(doseq [i (range 0 (count test-vectors-jp))]
+  (let [tv (nth test-vectors-jp i)]
+    (add-test (symbol (str "test-vector-jp-" i))
+              (symbol (str *ns*))
+              (gen-test-vector-jp (symbol (str "test-vector-jp-" i)) tv))))
 
 (comment
   (clojure.test/run-all-tests))
