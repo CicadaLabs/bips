@@ -4,7 +4,7 @@
                                         entropy->mnemonic
                                         mnemonic->seed]]
     [cicadabank.proposals.utils :refer [random-entropy entropy-string->entropy-byte-array]]
-    [clojure.data.json :as json]
+    [clojure.edn :as edn]
     [clojure.test :refer [deftest is]]))
 
 (deftest can-detect-invalid-mnemonic
@@ -32,18 +32,17 @@
   (is (= "crop cash unable insane eight faith inflict route frame loud box vibrant"
          (entropy->mnemonic [0x33, 0xE4, 0x6B, 0xB1, 0x3A, 0x74, 0x6E, 0xA4, 0x1C, 0xDD, 0xE4, 0x5C, 0x90, 0x84, 0x6A, 0x79,]))))
 
-;; https://github.com/trezor/python-mnemonic/blob/master/vectors.json
-(def test-vectors
-  (-> "resources/assets/bip-39/vectors.json"
+(def test-vectors-en
+  (-> "test/cicadabank/proposals/vectors.edn"
       slurp
-      json/read-str
-      (get "english")))
+      edn/read-string
+      :english))
 
-;; https://github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
 (def test-vectors-jp
-  (-> "resources/assets/bip-39/test_JP_BIP39.json"
+  (-> "test/cicadabank/proposals/vectors.edn"
       slurp
-      json/read-str))
+      edn/read-string
+      :japanese))
 
 ;; https://gist.github.com/joelittlejohn/2ecc1256e5d184d78f30fd6c4641099e
 (defn add-test
@@ -54,23 +53,24 @@
 
 (defmacro gen-test-vector [n tv]
   `(deftest n
-     (let [entropy# (first ~tv)
-           mnemonic# (second ~tv)
-           seed# (nth ~tv 2)]
+     (let [entropy# (:entropy ~tv)
+           mnemonic# (:mnemonic ~tv)
+           seed# (:seed ~tv)
+           passphrase# (:passphrase ~tv)]
        (is (= mnemonic#
               (entropy->mnemonic
                 (entropy-string->entropy-byte-array entropy#))))
        (is (= seed#
-              (mnemonic->seed mnemonic# "TREZOR")))
+              (mnemonic->seed mnemonic# passphrase#)))
        (is (check-mnemonic mnemonic#)))))
 
 (defmacro gen-test-vector-jp [n tv]
   `(deftest n
-     (let [entropy# (get ~tv "entropy")
-           mnemonic# (java.text.Normalizer/normalize (get ~tv "mnemonic")
+     (let [entropy# (:entropy ~tv)
+           mnemonic# (java.text.Normalizer/normalize (:mnemonic ~tv)
                                                      java.text.Normalizer$Form/NFKD)
-           seed# (get ~tv "seed")
-           passphrase# (get ~tv "passphrase")]
+           seed# (:seed ~tv)
+           passphrase# (:passphrase ~tv)]
        (is (= mnemonic#
               (entropy->mnemonic
                 (entropy-string->entropy-byte-array entropy#) "japanese")))
@@ -78,8 +78,8 @@
               (mnemonic->seed mnemonic# passphrase#)))
        (is (check-mnemonic mnemonic#)))))
 
-(doseq [i (range 0 (count test-vectors))]
-  (let [tv (nth test-vectors i)]
+(doseq [i (range 0 (count test-vectors-en))]
+  (let [tv (nth test-vectors-en i)]
     (add-test (symbol (str "test-vector-" i))
               (symbol (str *ns*))
               (gen-test-vector (symbol (str "test-vector-" i)) tv))))
