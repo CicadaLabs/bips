@@ -1,7 +1,8 @@
 (ns bips.bip32-utils
   (:require
     [buddy.core.codecs :as codecs]
-    [buddy.core.hash :as hash])
+    [buddy.core.hash :as hash]
+    [clojure.math.numeric-tower :as math])
   (:import
     (org.bitcoinj.core
       Base58
@@ -69,3 +70,6 @@
                            0x02
                            0x03))
     (.decodePoint (.getCurve CURVE) compEnc)))
+
+(defn hardened [index]
+  (+ (math/expt 2 31) index))

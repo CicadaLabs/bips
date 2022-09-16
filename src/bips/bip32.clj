@@ -3,7 +3,8 @@
     [buddy.core.codecs :as codecs]
     [buddy.core.mac :as mac]
     [bips.bip32-utils :refer [compress-public-key
-                              decompressKey]]
+                              decompressKey
+                              hardened]]
     [clojure.math.numeric-tower :as math])
   (:import
     java.math.BigInteger
@@ -27,22 +28,21 @@
 
 (defn CKDpriv [{k-par :private-key
                 c-par :chain-code
-                i :index
-                depth :depth}]
+                depth :depth} index]
   (let [K-par (codecs/hex->bytes
                 (.toString (Sign/publicKeyFromPrivate
                              (BigInteger. (apply str k-par)
                                           16))
                            16))
         K-par-compressed (compress-public-key K-par)
-        I (if (>= i (math/expt 2 31))
+        I (if (>= index (hardened 0))
             (mac/hash (codecs/hex->bytes (str "00"
                                               k-par
-                                              (format "%08x" i)))
+                                              (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})
             (mac/hash (codecs/hex->bytes (str K-par-compressed
-                                              (format "%08x" i)))
+                                              (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512}))]
     {:private-key (.toString (.mod (.add (BigInteger. k-par 16)
@@ -50,18 +50,17 @@
                                    (.getN Sign/CURVE_PARAMS))
                              16)
      :chain-code (codecs/bytes->hex (byte-array (take-last 32 I)))
-     :index i
-     :depth depth}))
+     :index index
+     :depth (+ depth 1)}))
 
 (defn CKDpub [{K-par :public-key
                c-par :chain-code
-               i :index
-               depth :depth}]
-  (if (>= i (math/expt 2 31))
-    nil
+               depth :depth} index]
+  (if (>= index (hardened 0))
+    (throw (Exception. "Cannot derive a public key for hardened child keys."))
     (let [c-K-par (compress-public-key (byte-array K-par))
           I (mac/hash (codecs/hex->bytes (str c-K-par
-                                              (format "%08x" i)))
+                                              (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})
           public-key (.getEncoded
@@ -73,17 +72,17 @@
                        false)]
       {:public-key (byte-array (take-last 64 public-key))
        :chain-code (codecs/bytes->hex (byte-array (take-last 32 I)))
-       :index i
-       :depth depth})))
+       :index index
+       :depth (+ depth 1)})))
 
 (defn N [{k-par :private-key
           c-par :chain-code
-          i :index
+          index :index
           depth :depth}]
   {:public-key (codecs/hex->bytes
                  (.toString
                    (Sign/publicKeyFromPrivate
                      (BigInteger. (apply str k-par) 16)) 16))
    :chain-code c-par
-   :index i
+   :index index
    :depth depth})
