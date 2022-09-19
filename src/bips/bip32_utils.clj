@@ -36,7 +36,7 @@
        (apply str (take 64 (codecs/bytes->hex K)))))
 
 (defn private-key-to-33-bytes [k]
-  (str "00" k))
+  (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
 
 (defn serialize [network type depth fingerprint
                  child-number chain-code key-data]

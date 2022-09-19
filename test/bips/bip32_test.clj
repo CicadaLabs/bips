@@ -51,7 +51,13 @@
         base58-encoded-great-grandchild-public-key (serialize :mainnet :public (:depth great-grandchild)
                                                               grandchild-fingerprint (:index great-grandchild)
                                                               (:chain-code neutered-great-grandchild)
-                                                              (:public-key neutered-great-grandchild))]
+                                                              (:public-key neutered-great-grandchild))
+        great-great-grandchild (CKDpriv great-grandchild 2)
+        great-grandchild-fingerprint (key-fingerprint (:public-key neutered-great-grandchild))
+        base58-encoded-great-great-grandchild-private-key (serialize :mainnet :private (:depth great-great-grandchild)
+                                                                     great-grandchild-fingerprint (:index great-great-grandchild)
+                                                                     (:chain-code great-great-grandchild)
+                                                                     (:private-key great-great-grandchild))]
     (is (= "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
            base58-encoded-private-key))
     (is (= "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"
@@ -69,7 +75,9 @@
     (is (= "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5"
            base58-encoded-great-grandchild-public-key))
     (is (thrown-with-msg? Exception #"Cannot derive a public key for hardened child keys."
-          (CKDpub child (hardened 2))))))
+          (CKDpub child (hardened 2))))
+    (is (= "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334"
+           base58-encoded-great-great-grandchild-private-key))))
 
 (deftest derive-master-code-ckd-priv-pub-neutered-test-vector-2
   (let [seed "fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542"
