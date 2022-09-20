@@ -151,7 +151,18 @@
         base58-encoded-neutered-great-grandchild-public-key (serialize :mainnet :public (:depth neutered-great-grandchild)
                                                                        grandchild-fingerprint (:index neutered-great-grandchild)
                                                                        (:chain-code neutered-great-grandchild)
-                                                                       (:public-key neutered-great-grandchild))]
+                                                                       (:public-key neutered-great-grandchild))
+        great-great-grandchild (CKDpriv great-grandchild (hardened 2147483646))
+        great-grandchild-fingerprint (key-fingerprint (:public-key neutered-great-grandchild))
+        base58-encoded-great-great-grandchild-private-key (serialize :mainnet :private (:depth great-great-grandchild)
+                                                                     great-grandchild-fingerprint (:index great-great-grandchild)
+                                                                     (:chain-code great-great-grandchild)
+                                                                     (:private-key great-great-grandchild))
+        neutered-great-great-grandchild (N great-great-grandchild)
+        base58-encoded-neutered-great-great-grandchild-public-key (serialize :mainnet :public (:depth neutered-great-great-grandchild)
+                                                                             great-grandchild-fingerprint (:index neutered-great-great-grandchild)
+                                                                             (:chain-code neutered-great-great-grandchild)
+                                                                             (:public-key neutered-great-great-grandchild))]
     (is (= "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U"
            base58-encoded-private-key))
     (is (= "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB"
@@ -173,4 +184,8 @@
     (is (and (= "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg5EwVvmdMVCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon"
                 base58-encoded-neutered-great-grandchild-public-key)
              (= "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg5EwVvmdMVCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon"
-                base58-encoded-great-grandchild-public-key)))))
+                base58-encoded-great-grandchild-public-key)))
+    (is (= "xprvA1RpRA33e1JQ7ifknakTFpgNXPmW2YvmhqLQYMmrj4xJXXWYpDPS3xz7iAxn8L39njGVyuoseXzU6rcxFLJ8HFsTjSyQbLYnMpCqE2VbFWc"
+           base58-encoded-great-great-grandchild-private-key))
+    (is (= "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+           base58-encoded-neutered-great-great-grandchild-public-key))))
