@@ -2,7 +2,11 @@
   (:require
     [buddy.core.codecs :as codecs]
     [buddy.core.hash :as hash]
-    [bips.bip32 :refer [derive-master-node CKDpriv CKDpub N]]
+    [bips.bip32 :refer [derive-master-node
+                        CKDpriv
+                        CKDpub
+                        N
+                        derive-path]]
     [bips.bip32-utils :refer [hardened key-fingerprint serialize]]
     [clojure.math.numeric-tower :as math]
     [clojure.test :refer [deftest is]])
@@ -14,6 +18,11 @@
   (let [seed "000102030405060708090a0b0c0d0e0f"
         ;; Chain m
         master-node (derive-master-node seed)
+        master-node-1 (derive-path "000102030405060708090a0b0c0d0e0f" "m")
+        base58-encoded-master-node-private-key (serialize :mainnet :private (:depth master-node-1)
+                                                          0 0
+                                                          (:chain-code master-node-1)
+                                                          (:private-key master-node-1))
         base58-encoded-private-key (serialize :mainnet :private (:depth master-node) 0 0
                                               (:chain-code master-node)
                                               (:private-key master-node))
@@ -100,6 +109,8 @@
            base58-encoded-private-key))
     (is (= "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"
            base58-encoded-public-key))
+    (is (= "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"
+           base58-encoded-master-node-private-key))
     ;; Chain m/0H
     (is (= "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7"
            base58-encoded-child-private-key))

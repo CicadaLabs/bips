@@ -30,10 +30,10 @@
              :private "04358394"}})
 
 (defn compress-public-key [K]
-  (str (if (= 0 (mod (nth K 63) 2))
+  (str (if (= 0 (mod (nth (codecs/hex->bytes K) 63) 2))
          "02"
          "03")
-       (apply str (take 64 (codecs/bytes->hex K)))))
+       (apply str (take 64 K))))
 
 (defn private-key-to-33-bytes [k]
   (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
@@ -46,7 +46,7 @@
                          (format "%08x" child-number)
                          chain-code
                          (if (= :public type)
-                           (compress-public-key key-data)
+                           key-data
                            (private-key-to-33-bytes key-data)))
         key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256
                                                    (byte-array (codecs/hex->bytes encoded-key)))))]
@@ -54,7 +54,7 @@
                                            (apply str (take 8 key-hash)))))))
 
 (defn key-identifier [K]
-  (Utils/sha256hash160 (codecs/hex->bytes (compress-public-key K))))
+  (Utils/sha256hash160 (codecs/hex->bytes K)))
 
 (defn key-fingerprint [K]
   (let [identifier (key-identifier K)]
