@@ -73,3 +73,6 @@
 
 (defn hardened [index]
   (+ (math/expt 2 31) index))
+
+(defn hardened? [path-part]
+  (= \H (last (char-array path-part))))

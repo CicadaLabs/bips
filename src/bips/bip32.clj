@@ -4,7 +4,7 @@
     [buddy.core.mac :as mac]
     [bips.bip32-utils :refer [compress-public-key
                               decompressKey
-                              hardened]]
+                              hardened hardened?]]
     [clojure.math.numeric-tower :as math]
     [clojure.string :as str])
   (:import
@@ -85,12 +85,22 @@
    :index index
    :depth depth})
 
-(defmacro derive-path [seed chain-path]
+(defmacro derive-path [seed chain-path key-type]
   (let [path-parts (str/split chain-path #"/")]
-    (if (= 1 (count path-parts))
-      (if (= "m" (first path-parts))
-        `(derive-master-node ~seed)
-        `(throw (Exception. (str "Invalid path: " (first ~path-parts))))))))
+    (loop [current-node (if (= "m" (first path-parts))
+                          `(derive-master-node ~seed)
+                          (throw (Exception.
+                                   (str "Invalid path: " (first path-parts)))))
+           parts (rest path-parts)]
+      (if (seq parts)
+        (let [part (first parts)
+              index (if (hardened? part)
+                      (hardened (Integer/parseInt (subs part 0 (- (count part) 1))))
+                      (Integer/parseInt part))]
+          (recur
+            `(CKDpriv ~current-node ~index)
+            (rest parts)))
+        (if (= :public key-type)
+          `(N ~current-node)
+          current-node)))))
 
-(comment
-  (derive-path "000102030405060708090a0b0c0d0e0f" "m"))
