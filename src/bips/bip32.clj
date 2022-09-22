@@ -4,7 +4,8 @@
     [buddy.core.mac :as mac]
     [bips.bip32-utils :refer [compress-public-key
                               decompressKey
-                              hardened hardened?]]
+                              hardened hardened?
+                              private-key-to-33-bytes]]
     [clojure.math.numeric-tower :as math]
     [clojure.string :as str])
   (:import
@@ -35,8 +36,7 @@
                                           16))
                            16))
         I (if (>= index (hardened 0))
-            (mac/hash (codecs/hex->bytes (str "00"
-                                              k-par
+            (mac/hash (codecs/hex->bytes (str (private-key-to-33-bytes k-par)
                                               (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})

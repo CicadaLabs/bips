@@ -500,5 +500,104 @@
     (is (thrown-with-msg? Exception #"Cannot derive a public key for hardened child keys."
           (CKDpub master-node (hardened 0))))))
 
+(deftest test-vector-4
+  "test the retention of leading zeros"
+  (let [seed "3ddd5602285899a946114506157c7997e5444528f3003f6134712147db19b678"
+        ;; Chain m
+        master-private-key (derive-path seed "m" :private)
+        base58-encoded-master-private-key (serialize :mainnet :private (:depth master-private-key)
+                                                     0 0
+                                                     (:chain-code master-private-key)
+                                                     (:private-key master-private-key))
+        master-public-key (derive-path seed "m" :public)
+        base58-encoded-master-public-key (serialize :mainnet :public (:depth master-public-key)
+                                                    0 0
+                                                    (:chain-code master-public-key)
+                                                    (:public-key master-public-key))
+        master-node (derive-master-node seed)
+        base58-encoded-master-node-private-key (serialize :mainnet :private (:depth master-node)
+                                                          0 0
+                                                          (:chain-code master-node)
+                                                          (:private-key master-node))
+        base58-encoded-master-node-public-key (serialize :mainnet :public (:depth master-node)
+                                                         0 0
+                                                         (:chain-code master-node)
+                                                         (:public-key master-node))
+        master-fingerprint (key-fingerprint (:public-key master-node))
+        ;; Chain m/0H
+        child-private-key (derive-path seed "m/0H" :private)
+        base58-encoded-child-private-key (serialize :mainnet :private (:depth child-private-key)
+                                                    master-fingerprint (:index child-private-key)
+                                                    (:chain-code child-private-key)
+                                                    (:private-key child-private-key))
+        child-public-key (derive-path seed "m/0H" :public)
+        base58-encoded-child-public-key (serialize :mainnet :public (:depth child-public-key)
+                                                   master-fingerprint (:index child-public-key)
+                                                   (:chain-code child-public-key)
+                                                   (:public-key child-public-key))
+        child-node (CKDpriv master-node (hardened 0))
+        base58-encoded-child-node-private-key (serialize :mainnet :private (:depth child-node)
+                                                         master-fingerprint (:index child-node)
+                                                         (:chain-code child-node)
+                                                         (:private-key child-node))
+        child-node-public-key (N child-node)
+        base58-encoded-child-node-public-key (serialize :mainnet :public (:depth child-node-public-key)
+                                                        master-fingerprint (:index child-node-public-key)
+                                                        (:chain-code child-node-public-key)
+                                                        (:public-key child-node-public-key))
+        child-fingerprint (key-fingerprint (:public-key child-node-public-key))
+        ;; Chain m/0H/1H
+        grandchild-private-key (derive-path seed "m/0H/1H" :private)
+        base58-encoded-grandchild-private-key (serialize :mainnet :private (:depth grandchild-private-key)
+                                                         child-fingerprint
+                                                         (:index grandchild-private-key)
+                                                         (:chain-code grandchild-private-key)
+                                                         (:private-key grandchild-private-key))
+        grandchild-public-key (derive-path seed "m/0H/1H" :public)
+        base58-encoded-grandchild-public-key (serialize :mainnet :public (:depth grandchild-public-key)
+                                                        child-fingerprint
+                                                        (:index grandchild-public-key)
+                                                        (:chain-code grandchild-public-key)
+                                                        (:public-key grandchild-public-key))
+        grandchild-node-private-key (CKDpriv child-node (hardened 1))
+        base58-encoded-grandchild-node-private-key (serialize :mainnet :private (:depth grandchild-node-private-key)
+                                                              child-fingerprint (:index grandchild-node-private-key)
+                                                              (:chain-code grandchild-node-private-key)
+                                                              (:private-key grandchild-node-private-key))
+        grandchild-node-public-key (N grandchild-node-private-key)
+        base58-encoded-grandchild-node-public-key (serialize :mainnet :public (:depth grandchild-node-public-key)
+                                                             child-fingerprint (:index grandchild-node-public-key)
+                                                             (:chain-code grandchild-node-public-key)
+                                                             (:public-key grandchild-node-public-key))]
+    ;; Chain m
+    (is (= "xprv9s21ZrQH143K48vGoLGRPxgo2JNkJ3J3fqkirQC2zVdk5Dgd5w14S7fRDyHH4dWNHUgkvsvNDCkvAwcSHNAQwhwgNMgZhLtQC63zxwhQmRv"
+           base58-encoded-master-private-key))
+    (is (= "xpub661MyMwAqRbcGczjuMoRm6dXaLDEhW1u34gKenbeYqAix21mdUKJyuyu5F1rzYGVxyL6tmgBUAEPrEz92mBXjByMRiJdba9wpnN37RLLAXa"
+           base58-encoded-master-public-key))
+    (is (= "xprv9s21ZrQH143K48vGoLGRPxgo2JNkJ3J3fqkirQC2zVdk5Dgd5w14S7fRDyHH4dWNHUgkvsvNDCkvAwcSHNAQwhwgNMgZhLtQC63zxwhQmRv"
+           base58-encoded-master-node-private-key))
+    (is (= "xpub661MyMwAqRbcGczjuMoRm6dXaLDEhW1u34gKenbeYqAix21mdUKJyuyu5F1rzYGVxyL6tmgBUAEPrEz92mBXjByMRiJdba9wpnN37RLLAXa"
+           base58-encoded-master-node-public-key))
+    ;; Chain m/0H
+    (is (= "xprv9vB7xEWwNp9kh1wQRfCCQMnZUEG21LpbR9NPCNN1dwhiZkjjeGRnaALmPXCX7SgjFTiCTT6bXes17boXtjq3xLpcDjzEuGLQBM5ohqkao9G"
+           base58-encoded-child-node-private-key))
+    (is (= "xpub69AUMk3qDBi3uW1sXgjCmVjJ2G6WQoYSnNHyzkmdCHEhSZ4tBok37xfFEqHd2AddP56Tqp4o56AePAgCjYdvpW2PU2jbUPFKsav5ut6Ch1m"
+           base58-encoded-child-node-public-key))
+    (is (= "xprv9vB7xEWwNp9kh1wQRfCCQMnZUEG21LpbR9NPCNN1dwhiZkjjeGRnaALmPXCX7SgjFTiCTT6bXes17boXtjq3xLpcDjzEuGLQBM5ohqkao9G"
+           base58-encoded-child-private-key))
+    (is (= "xpub69AUMk3qDBi3uW1sXgjCmVjJ2G6WQoYSnNHyzkmdCHEhSZ4tBok37xfFEqHd2AddP56Tqp4o56AePAgCjYdvpW2PU2jbUPFKsav5ut6Ch1m"
+           base58-encoded-child-public-key))
+    (is (thrown-with-msg? Exception #"Cannot derive a public key for hardened child keys."
+          (CKDpub master-node (hardened 0))))
+    ;; Chain m/0H/1H
+    (is (= "xprv9xJocDuwtYCMNAo3Zw76WENQeAS6WGXQ55RCy7tDJ8oALr4FWkuVoHJeHVAcAqiZLE7Je3vZJHxspZdFHfnBEjHqU5hG1Jaj32dVoS6XLT1"
+           base58-encoded-grandchild-private-key))
+    (is (= "xpub6BJA1jSqiukeaesWfxe6sNK9CCGaujFFSJLomWHprUL9DePQ4JDkM5d88n49sMGJxrhpjazuXYWdMf17C9T5XnxkopaeS7jGk1GyyVziaMt"
+           base58-encoded-grandchild-public-key))
+    (is (= "xprv9xJocDuwtYCMNAo3Zw76WENQeAS6WGXQ55RCy7tDJ8oALr4FWkuVoHJeHVAcAqiZLE7Je3vZJHxspZdFHfnBEjHqU5hG1Jaj32dVoS6XLT1"
+           base58-encoded-grandchild-node-private-key))
+    (is (= "xpub6BJA1jSqiukeaesWfxe6sNK9CCGaujFFSJLomWHprUL9DePQ4JDkM5d88n49sMGJxrhpjazuXYWdMf17C9T5XnxkopaeS7jGk1GyyVziaMt"
+           base58-encoded-grandchild-node-public-key))))
+
 (comment
   (clojure.test/run-all-tests))
