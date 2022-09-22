@@ -1,14 +1,16 @@
 (ns bips.bip32-utils
   (:require
+    [alphabase.base58 :as b58]
     [buddy.core.codecs :as codecs]
     [buddy.core.hash :as hash]
     [clojure.math.numeric-tower :as math])
   (:import
-    (org.bitcoinj.core
-      Base58
-      Utils)
+    (java.security
+      MessageDigest)
     (org.bouncycastle.asn1.x9
       X9IntegerConverter)
+    (org.bouncycastle.crypto.digests
+      RIPEMD160Digest)
     (org.bouncycastle.crypto.ec
       CustomNamedCurves)
     (org.bouncycastle.crypto.params
@@ -29,6 +31,19 @@
    :testnet {:public "043587CF"
              :private "04358394"}})
 
+(defn sha256hash [data]
+  (let [digest (.digest (MessageDigest/getInstance "SHA-256")
+                        data)]
+    digest))
+
+(defn sha256hash160 [input]
+  (let [sha256 (sha256hash input)
+        digest (new RIPEMD160Digest)
+        output (byte-array 20)]
+    (.update digest sha256 0 (count sha256))
+    (.doFinal digest output 0)
+    output))
+
 (defn compress-public-key [K]
   (str (if (= 0 (mod (nth (codecs/hex->bytes K) 63) 2))
          "02"
@@ -38,8 +53,8 @@
 (defn private-key-to-33-bytes [k]
   (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
 
-(defn serialize [network type depth fingerprint
-                 child-number chain-code key-data]
+(defn serialize-base58 [network type depth fingerprint
+                        child-number chain-code key-data]
   (let [encoded-key (str (get (get version-bytes network) type)
                          (format "%02x" depth)
                          (format "%08x" fingerprint)
@@ -50,11 +65,11 @@
                            (private-key-to-33-bytes key-data)))
         key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256
                                                    (byte-array (codecs/hex->bytes encoded-key)))))]
-    (Base58/encode (codecs/hex->bytes (str encoded-key
-                                           (apply str (take 8 key-hash)))))))
+    (b58/encode (codecs/hex->bytes (str encoded-key
+                                        (apply str (take 8 key-hash)))))))
 
 (defn key-identifier [K]
-  (Utils/sha256hash160 (codecs/hex->bytes K)))
+  (sha256hash160 (codecs/hex->bytes K)))
 
 (defn key-fingerprint [K]
   (let [identifier (key-identifier K)]
