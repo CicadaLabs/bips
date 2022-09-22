@@ -3,14 +3,16 @@
     [buddy.core.codecs :as codecs]
     [buddy.core.mac :as mac]
     [bips.bip32-utils :refer [compress-public-key
+                              CURVE_PARAMS
                               decompressKey
                               hardened hardened?
-                              private-key-to-33-bytes]]
+                              private-key->33-bytes
+                              private->public-key
+                              private->public-point]]
     [clojure.math.numeric-tower :as math]
     [clojure.string :as str])
   (:import
-    java.math.BigInteger
-    org.web3j.crypto.Sign))
+    java.math.BigInteger))
 
 (defn derive-master-node
   [seed]
@@ -20,10 +22,8 @@
                                               :alg :hmac+sha512}))
         private-key (apply str (take 64 master-code))]
     {:private-key private-key
-     :public-key (compress-public-key (.toString (Sign/publicKeyFromPrivate
-                                                   (BigInteger. (apply str private-key)
-                                                                16))
-                                                 16))
+     :public-key (compress-public-key (.toString (private->public-key
+                                                   (BigInteger. private-key 16)) 16))
      :chain-code (apply str (take-last 64 master-code))
      :depth 0}))
 
@@ -31,12 +31,12 @@
                 c-par :chain-code
                 depth :depth} index]
   (let [K-par (compress-public-key
-                (.toString (Sign/publicKeyFromPrivate
+                (.toString (private->public-key
                              (BigInteger. (apply str k-par)
                                           16))
                            16))
         I (if (>= index (hardened 0))
-            (mac/hash (codecs/hex->bytes (str (private-key-to-33-bytes k-par)
+            (mac/hash (codecs/hex->bytes (str (private-key->33-bytes k-par)
                                               (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})
@@ -46,7 +46,7 @@
                        :alg :hmac+sha512}))]
     {:private-key (.toString (.mod (.add (BigInteger. k-par 16)
                                          (BigInteger. 1 (byte-array (take 32 I))))
-                                   (.getN Sign/CURVE_PARAMS))
+                                   (.getN CURVE_PARAMS))
                              16)
      :chain-code (codecs/bytes->hex (byte-array (take-last 32 I)))
      :index index
@@ -63,7 +63,7 @@
                        :alg :hmac+sha512})
           public-key (.getEncoded
                        (.add
-                         (Sign/publicPointFromPrivate
+                         (private->public-point
                            (BigInteger. 1 (byte-array (take 32 I))))
                          (decompressKey (BigInteger. (apply str K-par) 16)
                                         (= 0 (mod (nth (codecs/hex->bytes K-par) 0) 2))))
@@ -79,7 +79,7 @@
           depth :depth}]
   {:public-key (compress-public-key
                  (.toString
-                   (Sign/publicKeyFromPrivate
+                   (private->public-key
                      (BigInteger. (apply str k-par) 16)) 16))
    :chain-code c-par
    :index index

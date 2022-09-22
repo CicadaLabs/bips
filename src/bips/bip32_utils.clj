@@ -14,7 +14,9 @@
     (org.bouncycastle.crypto.ec
       CustomNamedCurves)
     (org.bouncycastle.crypto.params
-      ECDomainParameters)))
+      ECDomainParameters)
+    (org.bouncycastle.math.ec
+      FixedPointCombMultiplier)))
 
 (def CURVE_PARAMS (CustomNamedCurves/getByName "secp256k1"))
 
@@ -50,7 +52,7 @@
          "03")
        (apply str (take 64 K))))
 
-(defn private-key-to-33-bytes [k]
+(defn private-key->33-bytes [k]
   (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
 
 (defn serialize-base58 [network type depth fingerprint
@@ -62,7 +64,7 @@
                          chain-code
                          (if (= :public type)
                            key-data
-                           (private-key-to-33-bytes key-data)))
+                           (private-key->33-bytes key-data)))
         key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256
                                                    (byte-array (codecs/hex->bytes encoded-key)))))]
     (b58/encode (codecs/hex->bytes (str encoded-key
@@ -91,3 +93,13 @@
 
 (defn hardened? [path-part]
   (= \H (last (char-array path-part))))
+
+(defn private->public-point [privKey]
+  (if (> (.bitLength privKey) (.bitLength (.getN CURVE)))
+    (.multiply (FixedPointCombMultiplier.) (.getG CURVE) (.mod privKey (.getN CURVE)))
+    (.multiply (FixedPointCombMultiplier.) (.getG CURVE) privKey)))
+
+(defn private->public-key [privKey]
+  (let [point (private->public-point privKey)
+        encoded (.getEncoded point false)]
+    (BigInteger. 1 (byte-array (take-last (- (count encoded) 1) encoded)))))

@@ -9,10 +9,7 @@
     [bips.bip32-utils :refer [hardened
                               key-fingerprint
                               serialize-base58]]
-    [clojure.test :refer [deftest is]])
-  (:import
-    java.math.BigInteger
-    org.web3j.crypto.Sign))
+    [clojure.test :refer [deftest is]]))
 
 (deftest test-vector-1
   (let [seed "000102030405060708090a0b0c0d0e0f"
