@@ -51,6 +51,14 @@
 (defn private-key->33-bytes [k]
   (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
 
+(defn decompressKey [xBN yBit]
+  (let [x9 (new X9IntegerConverter)
+        compEnc (.integerToBytes x9 xBN (+ 1 (.getByteLength x9 (.getCurve CURVE))))]
+    (aset-byte compEnc 0 (if yBit
+                           0x02
+                           0x03))
+    (.decodePoint (.getCurve CURVE) compEnc)))
+
 (defn serialize-base58 [network type depth fingerprint
                         child-number chain-code key-data]
   (let [encoded-key (str (get-in version-bytes [network type])
@@ -186,14 +194,6 @@
             (bit-shift-left (bit-and (nth identifier 2) 0xFF) 8)
             (bit-shift-left (bit-and (nth identifier 1) 0xFF) 16)
             (bit-shift-left (bit-and (first identifier) 0xFF) 24))))
-
-(defn decompressKey [xBN yBit]
-  (let [x9 (new X9IntegerConverter)
-        compEnc (.integerToBytes x9 xBN (+ 1 (.getByteLength x9 (.getCurve CURVE))))]
-    (aset-byte compEnc 0 (if yBit
-                           0x02
-                           0x03))
-    (.decodePoint (.getCurve CURVE) compEnc)))
 
 (defn hardened [index]
   (+ (math/expt 2 31) index))
