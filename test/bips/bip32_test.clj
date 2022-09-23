@@ -8,6 +8,7 @@
                         derive-path]]
     [bips.bip32-utils :refer [hardened
                               key-fingerprint
+                              deserialize-base58
                               serialize-base58]]
     [clojure.test :refer [deftest is]]))
 
@@ -595,6 +596,80 @@
            base58-encoded-grandchild-node-private-key))
     (is (= "xpub6BJA1jSqiukeaesWfxe6sNK9CCGaujFFSJLomWHprUL9DePQ4JDkM5d88n49sMGJxrhpjazuXYWdMf17C9T5XnxkopaeS7jGk1GyyVziaMt"
            base58-encoded-grandchild-node-public-key))))
+
+(deftest test-vector-5
+  "test that invalid extended keys are recognized as invalid."
+  (is (thrown-with-msg? Exception #"pubkey version / prvkey mismatch"
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6LBpB85b3D2yc8sfvZU521AAwdZafEz7mnzBBsz4wKY5fTtTQBm")))
+  (is (thrown-with-msg? Exception #"prvkey version / pubkey mismatch"
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGTQQD3dC4H2D5GBj7vWvSQaaBv5cxi9gafk7NF3pnBju6dwKvH")))
+  (is (thrown-with-msg? Exception #"invalid pubkey prefix: .*"
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Txnt3siSujt9RCVYsx4qHZGc62TG4McvMGcAUjeuwZdduYEvFn")))
+  (is (thrown-with-msg? Exception #"invalid prvkey prefix: .*"
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGpWnsj83BHtEy5Zt8CcDr1UiRXuWCmTQLxEK9vbz5gPstX92JQ")))
+  (is (thrown-with-msg? Exception #"invalid pubkey prefix: .*"
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6N8ZMMXctdiCjxTNq964yKkwrkBJJwpzZS4HS2fxvyYUA4q2Xe4")))
+  (is (thrown-with-msg? Exception #"invalid prvkey prefix: .*"
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD9y5gkZ6Eq3Rjuahrv17fEQ3Qen6J")))
+  (is (thrown-with-msg? Exception #"zero depth with non-zero parent fingerprint: .*"
+        (deserialize-base58 "xprv9s2SPatNQ9Vc6GTbVMFPFo7jsaZySyzk7L8n2uqKXJen3KUmvQNTuLh3fhZMBoG3G4ZW1N2kZuHEPY53qmbZzCHshoQnNf4GvELZfqTUrcv")))
+  (is (thrown-with-msg? Exception #"zero depth with non-zero parent fingerprint: .*"
+        (deserialize-base58 "xpub661no6RGEX3uJkY4bNnPcw4URcQTrSibUZ4NqJEw5eBkv7ovTwgiT91XX27VbEXGENhYRCf7hyEbWrR3FewATdCEebj6znwMfQkhRYHRLpJ")))
+  (is (thrown-with-msg? Exception #"zero depth with non-zero index"
+        (deserialize-base58 "xprv9s21ZrQH4r4TsiLvyLXqM9P7k1K3EYhA1kkD6xuquB5i39AU8KF42acDyL3qsDbU9NmZn6MsGSUYZEsuoePmjzsB3eFKSUEh3Gu1N3cqVUN")))
+  (is (thrown-with-msg? Exception #"zero depth with non-zero index"
+        (deserialize-base58 "xpub661MyMwAuDcm6CRQ5N4qiHKrJ39Xe1R1NyfouMKTTWcguwVcfrZJaNvhpebzGerh7gucBvzEQWRugZDuDXjNDRmXzSZe4c7mnTK97pTvGS8")))
+  (is (thrown-with-msg? Exception #"unknown extended key version: .*"
+        (deserialize-base58 "DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHGMQzT7ayAmfo4z3gY5KfbrZWZ6St24UVf2Qgo6oujFktLHdHY4")))
+  (is (thrown-with-msg? Exception #"unknown extended key version: .*"
+        (deserialize-base58 "DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHPmHJiEDXkTiJTVV9rHEBUem2mwVbbNfvT2MTcAqj3nesx8uBf9")))
+  (is (thrown-with-msg? Exception #"private key .* not in 1..n-1"
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzF93Y5wvzdUayhgkkFoicQZcP3y52uPPxFnfoLZB21Teqt1VvEHx")))
+  (is (thrown-with-msg? Exception #"private key .* not in 1..n-1"
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD5SDKr24z3aiUvKr9bJpdrcLg1y3G")))
+  (is (thrown-with-msg? Exception #"invalid pubkey: .*"
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Q5JXayek4PRsn35jii4veMimro1xefsM58PgBMrvdYre8QyULY")))
+  (is (thrown-with-msg? Exception #"invalid checksum: .*"
+        (deserialize-base58 "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"))))
+
+(deftest test-deserialization-base58
+  "test more data than expected"
+  (is (thrown-with-msg? Exception #"Found unexpected data in key"
+        (deserialize-base58 "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW555"))))
+
+(deftest test-reserialization-base58
+  "Reserializing a deserialized key should yield the original input"
+  (let [;; This is the public encoding of the key with path m/0H/1/2H from BIP32 published test vector 1:
+        ;; https://en.bitcoin.it/wiki/BIP_0032_TestVectors
+        encoded-1 "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5"
+        decoded-1 (deserialize-base58 encoded-1)
+        ;; This encoding is the same key but including its private data:
+        encoded-2 "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM"
+        decoded-2 (deserialize-base58 encoded-2)]
+    (is (= encoded-1
+           (serialize-base58 (:network decoded-1)
+                             (:type decoded-1)
+                             (:depth decoded-1)
+                             (:fingerprint decoded-1)
+                             (:index decoded-1)
+                             (:chain-code decoded-1)
+                             (case (:type decoded-1)
+                               :public
+                               (:public-key decoded-1)
+                               :private
+                               (:private-key decoded-1)))))
+    (is (= encoded-2
+           (serialize-base58 (:network decoded-2)
+                             (:type decoded-2)
+                             (:depth decoded-2)
+                             (:fingerprint decoded-2)
+                             (:index decoded-2)
+                             (:chain-code decoded-2)
+                             (case (:type decoded-2)
+                               :public
+                               (:public-key decoded-2)
+                               :private
+                               (:private-key decoded-2)))))))
 
 (comment
   (clojure.test/run-all-tests))
