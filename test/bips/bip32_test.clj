@@ -434,8 +434,8 @@
     (is (= "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdSnLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt"
            base58-encoded-great-great-great-grandchild-node-public-key))))
 
+;; The CKD functions sometimes return 31 byte keys, the buffer has to be padded to 32 bytes
 (deftest test-vector-3
-  "Test retention of leading zeros"
   (let [seed "4b381541583be4423346c643850da4b320e46a87ae3d2a4e6da11eba819cd4acba45d239319ac14f863b8d5ab5a0d0c64d2e8a1e7d1457df2e5a3c51c73235be"
         ;; Chain m
         master-private-key (derive-path seed "m" :private)
@@ -490,18 +490,21 @@
            base58-encoded-master-public-key))
     ;; Chain m/0H
     (is (= "xprv9uPDJpEQgRQfDcW7BkF7eTya6RPxXeJCqCJGHuCJ4GiRVLzkTXBAJMu2qaMWPrS7AANYqdq6vcBcBUdJCVVFceUvJFjaPdGZ2y9WACViL4L"
-           base58-encoded-child-node-private-key))
+           base58-encoded-child-node-private-key)
+        "leading zeros are retained.")
     (is (= "xpub68NZiKmJWnxxS6aaHmn81bvJeTESw724CRDs6HbuccFQN9Ku14VQrADWgqbhhTHBaohPX4CjNLf9fq9MYo6oDaPPLPxSb7gwQN3ih19Zm4Y"
-           base58-encoded-child-node-public-key))
+           base58-encoded-child-node-public-key)
+        "leading zeros are retained.")
     (is (= "xprv9uPDJpEQgRQfDcW7BkF7eTya6RPxXeJCqCJGHuCJ4GiRVLzkTXBAJMu2qaMWPrS7AANYqdq6vcBcBUdJCVVFceUvJFjaPdGZ2y9WACViL4L"
            base58-encoded-child-private-key))
     (is (= "xpub68NZiKmJWnxxS6aaHmn81bvJeTESw724CRDs6HbuccFQN9Ku14VQrADWgqbhhTHBaohPX4CjNLf9fq9MYo6oDaPPLPxSb7gwQN3ih19Zm4Y"
-           base58-encoded-child-public-key))
+           base58-encoded-child-public-key)
+        "leading zeros are retained.")
     (is (thrown-with-msg? Exception #"Cannot derive a public key for hardened child keys."
           (CKDpub master-node (hardened 0))))))
 
+;; The CKD functions sometimes return 31 byte keys, the buffer has to be padded to 32 bytes
 (deftest test-vector-4
-  "test the retention of leading zeros"
   (let [seed "3ddd5602285899a946114506157c7997e5444528f3003f6134712147db19b678"
         ;; Chain m
         master-private-key (derive-path seed "m" :private)
@@ -591,56 +594,74 @@
           (CKDpub master-node (hardened 0))))
     ;; Chain m/0H/1H
     (is (= "xprv9xJocDuwtYCMNAo3Zw76WENQeAS6WGXQ55RCy7tDJ8oALr4FWkuVoHJeHVAcAqiZLE7Je3vZJHxspZdFHfnBEjHqU5hG1Jaj32dVoS6XLT1"
-           base58-encoded-grandchild-private-key))
+           base58-encoded-grandchild-private-key)
+        "leading zeros are retained.")
     (is (= "xpub6BJA1jSqiukeaesWfxe6sNK9CCGaujFFSJLomWHprUL9DePQ4JDkM5d88n49sMGJxrhpjazuXYWdMf17C9T5XnxkopaeS7jGk1GyyVziaMt"
-           base58-encoded-grandchild-public-key))
+           base58-encoded-grandchild-public-key)
+        "leading zeros are retained.")
     (is (= "xprv9xJocDuwtYCMNAo3Zw76WENQeAS6WGXQ55RCy7tDJ8oALr4FWkuVoHJeHVAcAqiZLE7Je3vZJHxspZdFHfnBEjHqU5hG1Jaj32dVoS6XLT1"
-           base58-encoded-grandchild-node-private-key))
+           base58-encoded-grandchild-node-private-key)
+        "leading zeros are retained.")
     (is (= "xpub6BJA1jSqiukeaesWfxe6sNK9CCGaujFFSJLomWHprUL9DePQ4JDkM5d88n49sMGJxrhpjazuXYWdMf17C9T5XnxkopaeS7jGk1GyyVziaMt"
-           base58-encoded-grandchild-node-public-key))))
+           base58-encoded-grandchild-node-public-key)
+        "leading zeros are retained.")))
 
 (deftest test-vector-5
-  "test that invalid extended keys are recognized as invalid."
   (is (thrown-with-msg? Exception #"pubkey version / prvkey mismatch"
-        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6LBpB85b3D2yc8sfvZU521AAwdZafEz7mnzBBsz4wKY5fTtTQBm")))
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6LBpB85b3D2yc8sfvZU521AAwdZafEz7mnzBBsz4wKY5fTtTQBm"))
+      "invalid extended keys are recognized as invalid.")
   (is (thrown-with-msg? Exception #"prvkey version / pubkey mismatch"
-        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGTQQD3dC4H2D5GBj7vWvSQaaBv5cxi9gafk7NF3pnBju6dwKvH")))
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGTQQD3dC4H2D5GBj7vWvSQaaBv5cxi9gafk7NF3pnBju6dwKvH")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"invalid pubkey prefix: .*"
-        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Txnt3siSujt9RCVYsx4qHZGc62TG4McvMGcAUjeuwZdduYEvFn")))
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Txnt3siSujt9RCVYsx4qHZGc62TG4McvMGcAUjeuwZdduYEvFn")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"invalid prvkey prefix: .*"
-        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGpWnsj83BHtEy5Zt8CcDr1UiRXuWCmTQLxEK9vbz5gPstX92JQ")))
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFGpWnsj83BHtEy5Zt8CcDr1UiRXuWCmTQLxEK9vbz5gPstX92JQ")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"invalid pubkey prefix: .*"
-        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6N8ZMMXctdiCjxTNq964yKkwrkBJJwpzZS4HS2fxvyYUA4q2Xe4")))
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6N8ZMMXctdiCjxTNq964yKkwrkBJJwpzZS4HS2fxvyYUA4q2Xe4")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"invalid prvkey prefix: .*"
-        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD9y5gkZ6Eq3Rjuahrv17fEQ3Qen6J")))
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD9y5gkZ6Eq3Rjuahrv17fEQ3Qen6J")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"zero depth with non-zero parent fingerprint: .*"
-        (deserialize-base58 "xprv9s2SPatNQ9Vc6GTbVMFPFo7jsaZySyzk7L8n2uqKXJen3KUmvQNTuLh3fhZMBoG3G4ZW1N2kZuHEPY53qmbZzCHshoQnNf4GvELZfqTUrcv")))
+        (deserialize-base58 "xprv9s2SPatNQ9Vc6GTbVMFPFo7jsaZySyzk7L8n2uqKXJen3KUmvQNTuLh3fhZMBoG3G4ZW1N2kZuHEPY53qmbZzCHshoQnNf4GvELZfqTUrcv")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"zero depth with non-zero parent fingerprint: .*"
-        (deserialize-base58 "xpub661no6RGEX3uJkY4bNnPcw4URcQTrSibUZ4NqJEw5eBkv7ovTwgiT91XX27VbEXGENhYRCf7hyEbWrR3FewATdCEebj6znwMfQkhRYHRLpJ")))
+        (deserialize-base58 "xpub661no6RGEX3uJkY4bNnPcw4URcQTrSibUZ4NqJEw5eBkv7ovTwgiT91XX27VbEXGENhYRCf7hyEbWrR3FewATdCEebj6znwMfQkhRYHRLpJ")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"zero depth with non-zero index"
-        (deserialize-base58 "xprv9s21ZrQH4r4TsiLvyLXqM9P7k1K3EYhA1kkD6xuquB5i39AU8KF42acDyL3qsDbU9NmZn6MsGSUYZEsuoePmjzsB3eFKSUEh3Gu1N3cqVUN")))
+        (deserialize-base58 "xprv9s21ZrQH4r4TsiLvyLXqM9P7k1K3EYhA1kkD6xuquB5i39AU8KF42acDyL3qsDbU9NmZn6MsGSUYZEsuoePmjzsB3eFKSUEh3Gu1N3cqVUN")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"zero depth with non-zero index"
-        (deserialize-base58 "xpub661MyMwAuDcm6CRQ5N4qiHKrJ39Xe1R1NyfouMKTTWcguwVcfrZJaNvhpebzGerh7gucBvzEQWRugZDuDXjNDRmXzSZe4c7mnTK97pTvGS8")))
+        (deserialize-base58 "xpub661MyMwAuDcm6CRQ5N4qiHKrJ39Xe1R1NyfouMKTTWcguwVcfrZJaNvhpebzGerh7gucBvzEQWRugZDuDXjNDRmXzSZe4c7mnTK97pTvGS8")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"unknown extended key version: .*"
-        (deserialize-base58 "DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHGMQzT7ayAmfo4z3gY5KfbrZWZ6St24UVf2Qgo6oujFktLHdHY4")))
+        (deserialize-base58 "DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHGMQzT7ayAmfo4z3gY5KfbrZWZ6St24UVf2Qgo6oujFktLHdHY4")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"unknown extended key version: .*"
-        (deserialize-base58 "DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHPmHJiEDXkTiJTVV9rHEBUem2mwVbbNfvT2MTcAqj3nesx8uBf9")))
+        (deserialize-base58 "DMwo58pR1QLEFihHiXPVykYB6fJmsTeHvyTp7hRThAtCX8CvYzgPcn8XnmdfHPmHJiEDXkTiJTVV9rHEBUem2mwVbbNfvT2MTcAqj3nesx8uBf9")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"private key .* not in 1..n-1"
-        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzF93Y5wvzdUayhgkkFoicQZcP3y52uPPxFnfoLZB21Teqt1VvEHx")))
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzF93Y5wvzdUayhgkkFoicQZcP3y52uPPxFnfoLZB21Teqt1VvEHx")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"private key .* not in 1..n-1"
-        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD5SDKr24z3aiUvKr9bJpdrcLg1y3G")))
+        (deserialize-base58 "xprv9s21ZrQH143K24Mfq5zL5MhWK9hUhhGbd45hLXo2Pq2oqzMMo63oStZzFAzHGBP2UuGCqWLTAPLcMtD5SDKr24z3aiUvKr9bJpdrcLg1y3G")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"invalid pubkey: .*"
-        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Q5JXayek4PRsn35jii4veMimro1xefsM58PgBMrvdYre8QyULY")))
+        (deserialize-base58 "xpub661MyMwAqRbcEYS8w7XLSVeEsBXy79zSzH1J8vCdxAZningWLdN3zgtU6Q5JXayek4PRsn35jii4veMimro1xefsM58PgBMrvdYre8QyULY")
+        "invalid extended keys are recognized as invalid."))
   (is (thrown-with-msg? Exception #"invalid checksum: .*"
-        (deserialize-base58 "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"))))
+        (deserialize-base58 "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHL"))
+      "invalid extended keys are recognized as invalid."))
 
 (deftest test-deserialization-base58
-  "test more data than expected"
   (is (thrown-with-msg? Exception #"Found unexpected data in key"
-        (deserialize-base58 "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW555"))))
+        (deserialize-base58 "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW555"))
+      "exeption is thrown when there are more data than expected."))
 
 (deftest test-reserialization-base58
-  "Reserializing a deserialized key should yield the original input"
   (let [;; This is the public encoding of the key with path m/0H/1/2H from BIP32 published test vector 1:
         ;; https://en.bitcoin.it/wiki/BIP_0032_TestVectors
         encoded-1 "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5"
@@ -659,7 +680,8 @@
                                :public
                                (:public-key decoded-1)
                                :private
-                               (:private-key decoded-1)))))
+                               (:private-key decoded-1))))
+        "Reserializing a deserialized key should yield the original input.")
     (is (= encoded-2
            (serialize-base58 (:network decoded-2)
                              (:type decoded-2)
@@ -671,15 +693,14 @@
                                :public
                                (:public-key decoded-2)
                                :private
-                               (:private-key decoded-2)))))))
+                               (:private-key decoded-2))))
+        "Reserializing a deserialized key should yield the original input.")))
 
 (deftest exceptional-cases-CKDpriv
-  "Testing exceptional cases for CKDpriv.
-   In case parse256(IL) ≥ n or ki = 0, the resulting key is invalid,
-   and one should proceed with the next value for i."
+
   (let [master-key (derive-master-node
                      (codecs/bytes->hex (codecs/str->bytes "test")))]
-    (with-redefs-fn {#'buddy.core.mac/hash (fn [input body-or-options]
+    (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
                                              (byte-array
                                                (concat
                                                  (codecs/hex->bytes
@@ -688,8 +709,11 @@
                                                    (.toString (.getN CURVE_PARAMS) 16)))))}
       #(is (thrown-with-msg? Exception
                              #"key is invalid, and one should proceed with the next value for i."
-             (CKDpriv master-key 1))))
-    (with-redefs-fn {#'buddy.core.mac/hash (fn [input body-or-options]
+             (CKDpriv master-key 1))
+           "Testing exceptional cases for CKDpriv.
+   In case parse256(IL) = n, the resulting key is invalid,
+   and one should proceed with the next value for i."))
+    (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
                                              (byte-array
                                                (concat
                                                  (codecs/hex->bytes
@@ -699,13 +723,19 @@
                                                    (.toString (.getN CURVE_PARAMS) 16)))))}
       #(is (thrown-with-msg? Exception
                              #"key is invalid, and one should proceed with the next value for i."
-             (CKDpriv master-key 1))))
+             (CKDpriv master-key 1))
+           "Testing exceptional cases for CKDpriv.
+   In case parse256(IL) > n, the resulting key is invalid,
+   and one should proceed with the next value for i."))
     (with-redefs-fn
-      {#'group-add (fn [k-par IL]
+      {#'group-add (fn [_ _]
                      (BigInteger/ZERO))}
       #(is (thrown-with-msg? Exception
                              #"key is invalid, and one should proceed with the next value for i."
-             (CKDpriv master-key 1))))))
+             (CKDpriv master-key 1))
+           "Testing exceptional cases for CKDpriv.
+   In case ki = 0, the resulting key is invalid,
+   and one should proceed with the next value for i."))))
 
 (comment
   (clojure.test/run-all-tests))

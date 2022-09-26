@@ -6,8 +6,6 @@
     [clojure.math.numeric-tower :as math]
     [clojure.string :as str])
   (:import
-    (java.security
-      MessageDigest)
     (org.bouncycastle.asn1.x9
       X9IntegerConverter)
     (org.bouncycastle.crypto.digests
@@ -152,7 +150,7 @@
       (try (decompressKey
              (BigInteger. (apply str (take-last 64 key-data)) 16)
              (= 2 (Integer/parseInt (apply str (take 2 key-data)))))
-           (catch IllegalArgumentException e
+           (catch IllegalArgumentException _
              (throw (Exception. (format "invalid pubkey: %s" key-data))))))
     (when (and (= :private type)
                (or
