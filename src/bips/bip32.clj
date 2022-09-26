@@ -3,6 +3,7 @@
     [buddy.core.codecs :as codecs]
     [buddy.core.mac :as mac]
     [bips.bip32-utils :refer [compress-public-key
+                              group-add
                               CURVE_PARAMS
                               decompressKey
                               hardened hardened?
@@ -43,12 +44,15 @@
             (mac/hash (codecs/hex->bytes (str K-par
                                               (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
-                       :alg :hmac+sha512}))]
-    {:private-key (.toString (.mod (.add (BigInteger. k-par 16)
-                                         (BigInteger. 1 (byte-array (take 32 I))))
-                                   (.getN CURVE_PARAMS))
-                             16)
-     :chain-code (codecs/bytes->hex (byte-array (take-last 32 I)))
+                       :alg :hmac+sha512}))
+        IL (byte-array (take 32 I))
+        IR (byte-array (take-last 32 I))
+        ki (group-add k-par IL)]
+    (when (or (>= (.compareTo (BigInteger. 1 IL) (.getN CURVE_PARAMS)) 0)
+              (= 0 (.compareTo BigInteger/ZERO ki)))
+      (throw (Exception. "key is invalid, and one should proceed with the next value for i.")))
+    {:private-key (.toString ki 16)
+     :chain-code (codecs/bytes->hex IR)
      :index index
      :depth (+ depth 1)}))
 

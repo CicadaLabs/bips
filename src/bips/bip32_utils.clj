@@ -210,3 +210,8 @@
   (let [point (private->public-point privKey)
         encoded (.getEncoded point false)]
     (BigInteger. 1 (byte-array (take-last (- (count encoded) 1) encoded)))))
+
+(defn group-add [k-par IL]
+  (.mod (.add (BigInteger. k-par 16)
+              (BigInteger. 1 IL))
+        (.getN CURVE_PARAMS)))

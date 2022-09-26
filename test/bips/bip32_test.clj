@@ -6,7 +6,9 @@
                         CKDpub
                         N
                         derive-path]]
-    [bips.bip32-utils :refer [hardened
+    [bips.bip32-utils :refer [CURVE_PARAMS
+                              group-add
+                              hardened
                               key-fingerprint
                               deserialize-base58
                               serialize-base58]]
@@ -670,6 +672,40 @@
                                (:public-key decoded-2)
                                :private
                                (:private-key decoded-2)))))))
+
+(deftest exceptional-cases-CKDpriv
+  "Testing exceptional cases for CKDpriv.
+   In case parse256(IL) ≥ n or ki = 0, the resulting key is invalid,
+   and one should proceed with the next value for i."
+  (let [master-key (derive-master-node
+                     (codecs/bytes->hex (codecs/str->bytes "test")))]
+    (with-redefs-fn {#'buddy.core.mac/hash (fn [input body-or-options]
+                                             (byte-array
+                                               (concat
+                                                 (codecs/hex->bytes
+                                                   (.toString (.getN CURVE_PARAMS) 16))
+                                                 (codecs/hex->bytes
+                                                   (.toString (.getN CURVE_PARAMS) 16)))))}
+      #(is (thrown-with-msg? Exception
+                             #"key is invalid, and one should proceed with the next value for i."
+             (CKDpriv master-key 1))))
+    (with-redefs-fn {#'buddy.core.mac/hash (fn [input body-or-options]
+                                             (byte-array
+                                               (concat
+                                                 (codecs/hex->bytes
+                                                   (.toString
+                                                     (.add (.getN CURVE_PARAMS) BigInteger/ONE) 16))
+                                                 (codecs/hex->bytes
+                                                   (.toString (.getN CURVE_PARAMS) 16)))))}
+      #(is (thrown-with-msg? Exception
+                             #"key is invalid, and one should proceed with the next value for i."
+             (CKDpriv master-key 1))))
+    (with-redefs-fn
+      {#'group-add (fn [k-par IL]
+                     (BigInteger/ZERO))}
+      #(is (thrown-with-msg? Exception
+                             #"key is invalid, and one should proceed with the next value for i."
+             (CKDpriv master-key 1))))))
 
 (comment
   (clojure.test/run-all-tests))
