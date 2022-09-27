@@ -669,7 +669,12 @@
         decoded-1 (deserialize-base58 encoded-1)
         ;; This encoding is the same key but including its private data:
         encoded-2 "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBDptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM"
-        decoded-2 (deserialize-base58 encoded-2)]
+        decoded-2 (deserialize-base58 encoded-2)
+        ;; These encodings are of the the root key of that hierarchy
+        encoded-3 "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB"
+        decoded-3 (deserialize-base58 encoded-3)
+        encoded-4 "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtALGdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U"
+        decoded-4 (deserialize-base58 encoded-4)]
     (is (= encoded-1
            (serialize-base58 (:network decoded-1)
                              (:type decoded-1)
@@ -683,6 +688,8 @@
                                :private
                                (:private-key decoded-1))))
         "Reserializing a deserialized key should yield the original input.")
+    (is (= 3 (:depth decoded-1)))
+    (is (= (Long/parseLong "bef5a2f9" 16) (:fingerprint decoded-1)))
     (is (= encoded-2
            (serialize-base58 (:network decoded-2)
                              (:type decoded-2)
@@ -695,7 +702,17 @@
                                (:public-key decoded-2)
                                :private
                                (:private-key decoded-2))))
-        "Reserializing a deserialized key should yield the original input.")))
+        "Reserializing a deserialized key should yield the original input.")
+    (is (= 3 (:depth decoded-2)))
+    (is (= (Long/parseLong "bef5a2f9" 16) (:fingerprint decoded-2)))
+    (is (= 0 (:depth decoded-3))
+        "depth of root node public HD key should be zero")
+    (is (= 0 (:fingerprint decoded-3))
+        "Parent fingerprint of root node public HD key should be zero")
+    (is (= 0 (:depth decoded-4))
+        "depth of root node public HD key should be zero")
+    (is (= 0 (:fingerprint decoded-4))
+        "Parent fingerprint of root node public HD key should be zero")))
 
 (deftest exceptional-cases-derive-master-node
   (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
@@ -813,6 +830,35 @@
            "Testing exceptional cases for CKDpub.
    In case Ki is the point at infinity, the resulting key is invalid,
    and one should proceed with the next value for i."))))
+
+;; Test from https://github.com/bitcoinj/bitcoinj/blob/master/core/src/test/java/org/bitcoinj/crypto/ChildKeyDerivationTest.java
+(deftest test-serialization-main-and-test-networks
+  (let [master-node (derive-master-node (codecs/bytes->hex
+                                          (.getBytes "satoshi lives!")))
+        base58-encoded-master-node-private-key (serialize-base58 :mainnet :private (:depth master-node)
+                                                                 0 0
+                                                                 (:chain-code master-node)
+                                                                 (:private-key master-node))
+        base58-encoded-master-node-public-key (serialize-base58 :mainnet :public (:depth master-node)
+                                                                0 0
+                                                                (:chain-code master-node)
+                                                                (:public-key master-node))
+        base58-encoded-master-node-private-key-testnet (serialize-base58 :testnet :private (:depth master-node)
+                                                                         0 0
+                                                                         (:chain-code master-node)
+                                                                         (:private-key master-node))
+        base58-encoded-master-node-public-key-testnet (serialize-base58 :testnet :public (:depth master-node)
+                                                                        0 0
+                                                                        (:chain-code master-node)
+                                                                        (:public-key master-node))]
+    (is (= "xprv9s21ZrQH143K2dhN197jMx1ppxRBHFKJpMqdLsF1ewxncv7quRED8N5nksxphju3W7naj1arF56L5PUEWfuSk8h73Sb2uh7bSwyXNrjzhAZ"
+           base58-encoded-master-node-private-key))
+    (is (= "xpub661MyMwAqRbcF7mq7Aejj5xZNzFfgi3ABamE9FedDHVmViSzSxYTgAQGcATDo2J821q7Y9EAagjg5EP3L7uBZk11PxZU3hikL59dexfLkz3"
+           base58-encoded-master-node-public-key))
+    (is (= "tprv8ZgxMBicQKsPdSvtfhyEXbdp95qPWmMK9ukkDHfU8vTGQWrvtnZxe7TEg48Ui7HMsZKMj7CcQRg8YF1ydtFPZBxha5oLa3qeN3iwpYhHPVZ"
+           base58-encoded-master-node-private-key-testnet))
+    (is (= "tpubD6NzVbkrYhZ4WuxgZMdpw1Hvi7MKg6YDjDMXVohmZCFfF17hXBPYpc56rCY1KXFMovN29ik37nZimQseiykRTBTJTZJmjENyv2k3R12BJ1M"
+           base58-encoded-master-node-public-key-testnet))))
 
 (comment
   (clojure.test/run-all-tests))
