@@ -696,8 +696,43 @@
                                (:private-key decoded-2))))
         "Reserializing a deserialized key should yield the original input.")))
 
-(deftest exceptional-cases-CKDpriv
+(deftest exceptional-cases-derive-master-node
+  (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
+                                           (byte-array
+                                             (codecs/hex->bytes
+                                               (apply str (take 128 (repeat "0"))))))}
+    #(is (thrown-with-msg? Exception
+                           #"master key is invalid."
+           (derive-master-node (codecs/bytes->hex
+                                 (codecs/str->bytes "test"))))
+         "In case parse256(IL) is 0, the master key is invalid."))
+  (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
+                                           (byte-array
+                                             (concat
+                                               (codecs/hex->bytes
+                                                 (.toString (.getN CURVE_PARAMS) 16))
+                                               (codecs/hex->bytes
+                                                 (.toString (.getN CURVE_PARAMS) 16)))))}
+    #(is (thrown-with-msg? Exception
+                           #"master key is invalid."
+           (derive-master-node (codecs/bytes->hex
+                                 (codecs/str->bytes "test"))))
+         "In case parse256(IL) = n, the master key is invalid."))
+  (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
+                                           (byte-array
+                                             (concat
+                                               (codecs/hex->bytes
+                                                 (.toString
+                                                   (.add (.getN CURVE_PARAMS) BigInteger/ONE) 16))
+                                               (codecs/hex->bytes
+                                                 (.toString (.getN CURVE_PARAMS) 16)))))}
+    #(is (thrown-with-msg? Exception
+                           #"master key is invalid."
+           (derive-master-node (codecs/bytes->hex
+                                 (codecs/str->bytes "test"))))
+         "In case parse256(IL) > n, the master key is invalid.")))
 
+(deftest exceptional-cases-CKDpriv
   (let [master-key (derive-master-node
                      (codecs/bytes->hex (codecs/str->bytes "test")))]
     (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]

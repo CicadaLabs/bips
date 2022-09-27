@@ -22,9 +22,13 @@
           (mac/hash (codecs/hex->bytes seed) {:key (codecs/str->bytes "Bitcoin seed")
                                               :alg :hmac+sha512}))
         private-key (apply str (take 64 master-code))]
+    (when (or (= 0 (.compareTo (BigInteger/ZERO) (BigInteger. private-key 16)))
+              (>= (.compareTo (BigInteger. private-key 16)
+                              (.getN CURVE_PARAMS)) 0))
+      (throw (Exception. "the master key is invalid.")))
     {:private-key private-key
      :public-key (compress-public-key (.toString (private->public-key
-                                                   (BigInteger. private-key 16)) 16))
+                                                  (BigInteger. private-key 16)) 16))
      :chain-code (apply str (take-last 64 master-code))
      :depth 0}))
 
