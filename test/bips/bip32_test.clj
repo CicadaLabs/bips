@@ -6,7 +6,8 @@
                         CKDpub
                         N
                         derive-path]]
-    [bips.bip32-utils :refer [CURVE_PARAMS
+    [bips.bip32-utils :refer [add-point
+                              CURVE_PARAMS
                               group-add
                               hardened
                               key-fingerprint
@@ -743,7 +744,7 @@
                                                  (codecs/hex->bytes
                                                    (.toString (.getN CURVE_PARAMS) 16)))))}
       #(is (thrown-with-msg? Exception
-                             #"key is invalid, and one should proceed with the next value for i."
+                             #"key is invalid, proceed with the next value for i."
              (CKDpriv master-key 1))
            "Testing exceptional cases for CKDpriv.
    In case parse256(IL) = n, the resulting key is invalid,
@@ -757,7 +758,7 @@
                                                  (codecs/hex->bytes
                                                    (.toString (.getN CURVE_PARAMS) 16)))))}
       #(is (thrown-with-msg? Exception
-                             #"key is invalid, and one should proceed with the next value for i."
+                             #"key is invalid, proceed with the next value for i."
              (CKDpriv master-key 1))
            "Testing exceptional cases for CKDpriv.
    In case parse256(IL) > n, the resulting key is invalid,
@@ -766,10 +767,51 @@
       {#'group-add (fn [_ _]
                      (BigInteger/ZERO))}
       #(is (thrown-with-msg? Exception
-                             #"key is invalid, and one should proceed with the next value for i."
+                             #"key is invalid, proceed with the next value for i."
              (CKDpriv master-key 1))
            "Testing exceptional cases for CKDpriv.
    In case ki = 0, the resulting key is invalid,
+   and one should proceed with the next value for i."))))
+
+(deftest exceptional-cases-CKDpub
+  (let [master-key (derive-master-node
+                     (codecs/bytes->hex (codecs/str->bytes "test")))]
+    (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
+                                             (byte-array
+                                               (concat
+                                                 (codecs/hex->bytes
+                                                   (.toString (.getN CURVE_PARAMS) 16))
+                                                 (codecs/hex->bytes
+                                                   (.toString (.getN CURVE_PARAMS) 16)))))}
+      #(is (thrown-with-msg? Exception
+                             #"key is invalid, proceed with the next value for i."
+             (CKDpub master-key 1))
+           "Testing exceptional cases for CKDpub.
+   In case parse256(IL) = n, the resulting key is invalid,
+   and one should proceed with the next value for i."))
+    (with-redefs-fn {#'buddy.core.mac/hash (fn [_ _]
+                                             (byte-array
+                                               (concat
+                                                 (codecs/hex->bytes
+                                                   (.toString
+                                                     (.add (.getN CURVE_PARAMS)
+                                                           BigInteger/ONE) 16))
+                                                 (codecs/hex->bytes
+                                                   (.toString
+                                                     (.getN CURVE_PARAMS) 16)))))}
+      #(is (thrown-with-msg? Exception
+                             #"key is invalid, proceed with the next value for i."
+             (CKDpub master-key 1))
+           "Testing exceptional cases for CKDpub.
+   In case parse256(IL) > n, the resulting key is invalid,
+   and one should proceed with the next value for i."))
+    (with-redefs-fn {#'add-point (fn [_ _]
+                                   (.getInfinity (.getCurve CURVE_PARAMS)))}
+      #(is (thrown-with-msg? Exception
+                             #"key is invalid, proceed with the next value for i."
+             (CKDpub master-key 1))
+           "Testing exceptional cases for CKDpub.
+   In case Ki is the point at infinity, the resulting key is invalid,
    and one should proceed with the next value for i."))))
 
 (comment

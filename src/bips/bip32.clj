@@ -2,15 +2,14 @@
   (:require
     [buddy.core.codecs :as codecs]
     [buddy.core.mac :as mac]
-    [bips.bip32-utils :refer [compress-public-key
+    [bips.bip32-utils :refer [add-point
+                              compress-public-key
                               group-add
                               CURVE_PARAMS
                               decompressKey
                               hardened hardened?
                               private-key->33-bytes
-                              private->public-key
-                              private->public-point]]
-    [clojure.math.numeric-tower :as math]
+                              private->public-key]]
     [clojure.string :as str])
   (:import
     java.math.BigInteger))
@@ -28,7 +27,7 @@
       (throw (Exception. "the master key is invalid.")))
     {:private-key private-key
      :public-key (compress-public-key (.toString (private->public-key
-                                                  (BigInteger. private-key 16)) 16))
+                                                   (BigInteger. private-key 16)) 16))
      :chain-code (apply str (take-last 64 master-code))
      :depth 0}))
 
@@ -54,7 +53,7 @@
         ki (group-add k-par IL)]
     (when (or (>= (.compareTo (BigInteger. 1 IL) (.getN CURVE_PARAMS)) 0)
               (= 0 (.compareTo BigInteger/ZERO ki)))
-      (throw (Exception. "key is invalid, and one should proceed with the next value for i.")))
+      (throw (Exception. "key is invalid, proceed with the next value for i.")))
     {:private-key (.toString ki 16)
      :chain-code (codecs/bytes->hex IR)
      :index index
@@ -69,14 +68,16 @@
                                               (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})
-          public-key (.getEncoded
-                       (.add
-                         (private->public-point
-                           (BigInteger. 1 (byte-array (take 32 I))))
-                         (decompressKey (BigInteger. (apply str K-par) 16)
-                                        (= 0 (mod (nth (codecs/hex->bytes K-par) 0) 2))))
-                       true)]
-      {:public-key (codecs/bytes->hex (byte-array (take-last 64 public-key)))
+          IL (byte-array (take 32 I))
+          _ (when (>= (.compareTo (BigInteger. 1 IL) (.getN CURVE_PARAMS)) 0)
+              (throw (Exception. "key is invalid, proceed with the next value for i.")))
+          public-key (add-point K-par IL)]
+      (when (.equals public-key
+                     (.getInfinity (.getCurve CURVE_PARAMS)))
+        (throw (Exception. "key is invalid, proceed with the next value for i.")))
+      {:public-key (codecs/bytes->hex (byte-array
+                                        (take-last 64
+                                                   (.getEncoded public-key true))))
        :chain-code (codecs/bytes->hex (byte-array (take-last 32 I)))
        :index index
        :depth (+ depth 1)})))

@@ -213,3 +213,9 @@
   (.mod (.add (BigInteger. k-par 16)
               (BigInteger. 1 IL))
         (.getN CURVE_PARAMS)))
+
+(defn add-point [Ki IL]
+  (.add
+    (private->public-point (BigInteger. 1 IL))
+    (decompressKey (BigInteger. (apply str Ki) 16)
+                   (= 0 (mod (nth (codecs/hex->bytes Ki) 0) 2)))))
