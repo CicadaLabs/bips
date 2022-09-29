@@ -9,14 +9,14 @@
 
 ;; https://github.com/trezor/python-mnemonic/blob/master/vectors.json
 (def test-vectors-en
-  (-> "resources/assets/bip-39/vectors.json"
+  (-> "test/bips/fixtures/vectors.json"
       slurp
       json/read-str
       (get "english")))
 
 ;; https://github.com/bip32JP/bip32JP.github.io/blob/master/test_JP_BIP39.json
 (def test-vectors-jp
-  (-> "resources/assets/bip-39/test_JP_BIP39.json"
+  (-> "test/bips/fixtures/test_JP_BIP39.json"
       slurp
       json/read-str))
 
@@ -35,5 +35,5 @@
                                                   :bip32-xprv (get tv "bip32_xprv")}))
 
 (comment
-  (spit "test/cicadabank/proposals/vectors.edn" (prn-str @test-vectors))
-  (first (get (edn/read-string (slurp "test/cicadabank/proposals/vectors.edn")) :english)))
+  (spit "test/bips/fixtures/vectors.edn" (prn-str @test-vectors))
+  (first (get (edn/read-string (slurp "test/bips/fixtures/vectors.edn")) :english)))

@@ -33,13 +33,13 @@
          (entropy->mnemonic [0x33, 0xE4, 0x6B, 0xB1, 0x3A, 0x74, 0x6E, 0xA4, 0x1C, 0xDD, 0xE4, 0x5C, 0x90, 0x84, 0x6A, 0x79,]))))
 
 (def test-vectors-en
-  (-> "test/cicadabank/proposals/vectors.edn"
+  (-> "test/cicadabank/proposals/fixtures/vectors.edn"
       slurp
       edn/read-string
       :english))
 
 (def test-vectors-jp
-  (-> "test/cicadabank/proposals/vectors.edn"
+  (-> "test/cicadabank/proposals/fixtures/vectors.edn"
       slurp
       edn/read-string
       :japanese))
