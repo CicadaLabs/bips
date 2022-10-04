@@ -12,7 +12,11 @@
                               hardened
                               key-fingerprint
                               deserialize-base58
-                              serialize-base58]]
+                              serialize
+                              key-identifier
+                              serialize-base58
+                              encode-base58]]
+    [bips.btc-utils :refer [privatekey->wif]]
     [clojure.test :refer [deftest is]]))
 
 (deftest test-vector-1
@@ -24,11 +28,18 @@
                                                                  (:chain-code master-node-private-key)
                                                                  (:private-key master-node-private-key))
         master-node-public-key (derive-path seed "m" :public)
+        serialized-master-node-public-key (serialize :mainnet :public (:depth master-node-public-key)
+                                                     0 0
+                                                     (:chain-code master-node-public-key)
+                                                     (:public-key master-node-public-key))
         base58-encoded-master-node-public-key (serialize-base58 :mainnet :public (:depth master-node-public-key)
                                                                 0 0
                                                                 (:chain-code master-node-public-key)
                                                                 (:public-key master-node-public-key))
         master-node (derive-master-node seed)
+        serialized-master-node-private-key (serialize :mainnet :private (:depth master-node) 0 0
+                                                      (:chain-code master-node)
+                                                      (:private-key master-node))
         base58-encoded-private-key (serialize-base58 :mainnet :private (:depth master-node) 0 0
                                                      (:chain-code master-node)
                                                      (:private-key master-node))
@@ -171,6 +182,27 @@
            base58-encoded-master-node-private-key))
     (is (= "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8"
            base58-encoded-master-node-public-key))
+    (is (= "3442193e1bb70916e914552172cd4e2dbc9df811"
+           (codecs/bytes->hex (key-identifier (:public-key master-node)))))
+    (is (= (Long/parseLong "3442193e" 16)
+           (key-fingerprint (:public-key master-node))))
+    (is (= "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma"
+           (encode-base58 (byte-array (codecs/hex->bytes
+                                       (str "00" (codecs/bytes->hex
+                                                  (key-identifier (:public-key master-node)))))))))
+    (is (= "e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35"
+           (:private-key master-node)))
+    (is (= "L52XzL2cMkHxqxBXRyEpnPQZGUs3uKiL3R11XbAdHigRzDozKZeW"
+           (privatekey->wif (:private-key master-node)
+                                                      :mainnet true)))
+    (is (= "0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2"
+           (:public-key master-node)))
+    (is (= "873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d508"
+           (:chain-code master-node)))
+    (is (= "0488b21e000000000000000000873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d5080339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2"
+           serialized-master-node-public-key))
+    (is (= "0488ade4000000000000000000873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d50800e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35"
+           serialized-master-node-private-key))
     ;; Chain m/0H
     (is (= "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7"
            base58-encoded-child-private-key))
