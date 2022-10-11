@@ -59,11 +59,19 @@
                                                                (:chain-code child-node-public-key)
                                                                (:public-key child-node-public-key))
         child (CKDpriv master-node (hardened 0))
+        serialized-child-private-key (serialize :mainnet :private (:depth child) fingerprint
+                                                (:index child)
+                                                (:chain-code child)
+                                                (:private-key child))
         base58-encoded-child-private-key (serialize-base58 :mainnet :private (:depth child) fingerprint
                                                            (:index child)
                                                            (:chain-code child)
                                                            (:private-key child))
         neutered-child (N child)
+        serialized-child-public-key (serialize :mainnet :public (:depth neutered-child)
+                                               fingerprint (:index neutered-child)
+                                               (:chain-code neutered-child)
+                                               (:public-key neutered-child))
         base58-encoded-neutered-child-public-key (serialize-base58 :mainnet :public (:depth neutered-child)
                                                                    fingerprint (:index neutered-child)
                                                                    (:chain-code neutered-child)
@@ -188,13 +196,13 @@
            (key-fingerprint (:public-key master-node))))
     (is (= "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma"
            (encode-base58 (byte-array (codecs/hex->bytes
-                                       (str "00" (codecs/bytes->hex
-                                                  (key-identifier (:public-key master-node)))))))))
+                                        (str "00" (codecs/bytes->hex
+                                                    (key-identifier (:public-key master-node)))))))))
     (is (= "e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35"
            (:private-key master-node)))
     (is (= "L52XzL2cMkHxqxBXRyEpnPQZGUs3uKiL3R11XbAdHigRzDozKZeW"
            (privatekey->wif (:private-key master-node)
-                                                      :mainnet true)))
+                            :mainnet true)))
     (is (= "0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2"
            (:public-key master-node)))
     (is (= "873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d508"
@@ -212,6 +220,26 @@
            base58-encoded-child-node-private-key))
     (is (= "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw"
            base58-encoded-child-node-public-key))
+    (is (= "5c1bd648ed23aa5fd50ba52b2457c11e9e80a6a7"
+           (codecs/bytes->hex (key-identifier (:public-key neutered-child)))))
+    (is (= (Long/parseLong "5c1bd648" 16)
+           (key-fingerprint (:public-key neutered-child))))
+    (is (= "19Q2WoS5hSS6T8GjhK8KZLMgmWaq4neXrh"
+           (encode-base58 (byte-array (codecs/hex->bytes
+                                        (str "00" (codecs/bytes->hex
+                                                    (key-identifier (:public-key neutered-child)))))))))
+    (is (= "edb2e14f9ee77d26dd93b4ecede8d16ed408ce149b6cd80b0715a2d911a0afea"
+           (:private-key child)))
+    (is (= "L5BmPijJjrKbiUfG4zbiFKNqkvuJ8usooJmzuD7Z8dkRoTThYnAT"
+           (privatekey->wif (:private-key child) :mainnet true)))
+    (is (= "035a784662a4a20a65bf6aab9ae98a6c068a81c52e4b032c0fb5400c706cfccc56"
+           (:public-key neutered-child)))
+    (is (= "47fdacbd0f1097043b78c63c20c34ef4ed9a111d980047ad16282c7ae6236141"
+           (:chain-code child)))
+    (is (= "0488b21e013442193e8000000047fdacbd0f1097043b78c63c20c34ef4ed9a111d980047ad16282c7ae6236141035a784662a4a20a65bf6aab9ae98a6c068a81c52e4b032c0fb5400c706cfccc56"
+           serialized-child-public-key))
+    (is (= "0488ade4013442193e8000000047fdacbd0f1097043b78c63c20c34ef4ed9a111d980047ad16282c7ae623614100edb2e14f9ee77d26dd93b4ecede8d16ed408ce149b6cd80b0715a2d911a0afea"
+           serialized-child-private-key))
     ;; Chain m/0H/1
     (is (= "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLnvSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs"
            base58-encoded-grandchild-private-key))
