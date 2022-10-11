@@ -96,11 +96,19 @@
                                                                (:chain-code grandchildp)
                                                                (:public-key grandchildp))
         grandchild (CKDpriv child 1)
+        serialized-grandchild-private-key (serialize :mainnet :private (:depth grandchild)
+                                                     child-fingerprint (:index grandchild)
+                                                     (:chain-code grandchild)
+                                                     (:private-key grandchild))
         base58-encoded-grandchild-private-key (serialize-base58 :mainnet :private (:depth grandchild)
                                                                 child-fingerprint (:index grandchild)
                                                                 (:chain-code grandchild)
                                                                 (:private-key grandchild))
         neutered-grandchild (N grandchild)
+        serialized-grandchild-public-key (serialize :mainnet :public (:depth neutered-grandchild)
+                                                    child-fingerprint (:index neutered-grandchild)
+                                                    (:chain-code neutered-grandchild)
+                                                    (:public-key neutered-grandchild))
         base58-encoded-neutered-grandchild-public-key (serialize-base58 :mainnet :public (:depth neutered-grandchild)
                                                                         child-fingerprint (:index neutered-grandchild)
                                                                         (:chain-code neutered-grandchild)
@@ -251,6 +259,27 @@
            base58-encoded-grandchild-node-private-key))
     (is (= "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ"
            base58-encoded-grandchild-node-public-key))
+    (is (= "bef5a2f9a56a94aab12459f72ad9cf8cf19c7bbe"
+           (codecs/bytes->hex (key-identifier (:public-key neutered-grandchild)))))
+    (is (= (Long/parseLong "bef5a2f9" 16)
+           (key-fingerprint (:public-key neutered-grandchild))))
+    (is (= "1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj"
+           (encode-base58 (byte-array (codecs/hex->bytes
+                                        (str "00" (codecs/bytes->hex
+                                                    (key-identifier
+                                                      (:public-key neutered-grandchild)))))))))
+    (is (= "3c6cb8d0f6a264c91ea8b5030fadaa8e538b020f0a387421a12de9319dc93368"
+           (:private-key grandchild)))
+    (is (= "KyFAjQ5rgrKvhXvNMtFB5PCSKUYD1yyPEe3xr3T34TZSUHycXtMM"
+           (privatekey->wif (:private-key grandchild) :mainnet true)))
+    (is (= "03501e454bf00751f24b1b489aa925215d66af2234e3891c3b21a52bedb3cd711c"
+           (:public-key neutered-grandchild)))
+    (is (= "2a7857631386ba23dacac34180dd1983734e444fdbf774041578e9b6adb37c19"
+           (:chain-code grandchild)))
+    (is (= "0488b21e025c1bd648000000012a7857631386ba23dacac34180dd1983734e444fdbf774041578e9b6adb37c1903501e454bf00751f24b1b489aa925215d66af2234e3891c3b21a52bedb3cd711c"
+           serialized-grandchild-public-key))
+    (is (= "0488ade4025c1bd648000000012a7857631386ba23dacac34180dd1983734e444fdbf774041578e9b6adb37c19003c6cb8d0f6a264c91ea8b5030fadaa8e538b020f0a387421a12de9319dc93368"
+           serialized-grandchild-private-key))
     ;; Chain m/0H/1/2H
     (is (thrown-with-msg? Exception #"Cannot derive a public key for hardened child keys."
           (CKDpub child (hardened 2))))
