@@ -191,11 +191,19 @@
                                                                                       (:chain-code great-great-great-grandchild-node-public-key)
                                                                                       (:public-key great-great-great-grandchild-node-public-key))
         great-great-great-grandchild (CKDpriv great-great-grandchild 1000000000)
+        serialized-great-great-great-grandchild-private-key (serialize :mainnet :private (:depth great-great-great-grandchild)
+                                                                       great-great-grandchild-fingerprint (:index great-great-great-grandchild)
+                                                                       (:chain-code great-great-great-grandchild)
+                                                                       (:private-key great-great-great-grandchild))
         base58-encoded-great-great-great-grandchild-private-key (serialize-base58 :mainnet :private (:depth great-great-great-grandchild)
                                                                                   great-great-grandchild-fingerprint (:index great-great-great-grandchild)
                                                                                   (:chain-code great-great-great-grandchild)
                                                                                   (:private-key great-great-great-grandchild))
         neutered-great-great-great-grandchild (N great-great-great-grandchild)
+        serialized-great-great-great-grandchild-public-key (serialize :mainnet :public (:depth neutered-great-great-great-grandchild)
+                                                                      great-great-grandchild-fingerprint (:index neutered-great-great-great-grandchild)
+                                                                      (:chain-code neutered-great-great-great-grandchild)
+                                                                      (:public-key neutered-great-great-great-grandchild))
         base58-encoded-neutered-great-great-great-grandchild-public-key (serialize-base58 :mainnet :public (:depth neutered-great-great-great-grandchild)
                                                                                           great-great-grandchild-fingerprint (:index neutered-great-great-great-grandchild)
                                                                                           (:chain-code neutered-great-great-great-grandchild)
@@ -370,7 +378,28 @@
     (is (= "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8FHa8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76"
            base58-encoded-great-great-great-grandchild-node-private-key))
     (is (= "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSVqNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy"
-           base58-encoded-great-great-great-grandchild-node-public-key))))
+           base58-encoded-great-great-great-grandchild-node-public-key))
+    (is (= "d69aa102255fed74378278c7812701ea641fdf32"
+           (codecs/bytes->hex (key-identifier (:public-key neutered-great-great-great-grandchild)))))
+    (is (= (Long/parseLong "d69aa102" 16)
+           (key-fingerprint (:public-key neutered-great-great-great-grandchild))))
+    (is (= "1LZiqrop2HGR4qrH1ULZPyBpU6AUP49Uam"
+           (encode-base58 (codecs/hex->bytes
+                            (str "00"
+                                 (codecs/bytes->hex
+                                   (key-identifier (:public-key neutered-great-great-great-grandchild))))))))
+    (is (= "471b76e389e528d6de6d816857e012c5455051cad6660850e58372a6c3e6e7c8"
+           (:private-key great-great-great-grandchild)))
+    (is (= "Kybw8izYevo5xMh1TK7aUr7jHFCxXS1zv8p3oqFz3o2zFbhRXHYs"
+           (privatekey->wif (:private-key great-great-great-grandchild) :mainnet true)))
+    (is (= "022a471424da5e657499d1ff51cb43c47481a03b1e77f951fe64cec9f5a48f7011"
+           (:public-key neutered-great-great-great-grandchild)))
+    (is (= "c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e"
+           (:chain-code great-great-great-grandchild)))
+    (is (= "0488b21e05d880d7d83b9aca00c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e022a471424da5e657499d1ff51cb43c47481a03b1e77f951fe64cec9f5a48f7011"
+           serialized-great-great-great-grandchild-public-key))
+    (is (= "0488ade405d880d7d83b9aca00c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e00471b76e389e528d6de6d816857e012c5455051cad6660850e58372a6c3e6e7c8"
+           serialized-great-great-great-grandchild-private-key))))
 
 (deftest test-vector-2
   (let [seed "fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542"
