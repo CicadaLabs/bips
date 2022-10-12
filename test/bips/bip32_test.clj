@@ -405,11 +405,19 @@
   (let [seed "fffcf9f6f3f0edeae7e4e1dedbd8d5d2cfccc9c6c3c0bdbab7b4b1aeaba8a5a29f9c999693908d8a8784817e7b7875726f6c696663605d5a5754514e4b484542"
         ;; Chain m
         master-node-private-key (derive-path seed "m" :private)
+        serialized-master-node-private-key (serialize :mainnet :private (:depth master-node-private-key)
+                                                      0 0
+                                                      (:chain-code master-node-private-key)
+                                                      (:private-key master-node-private-key))
         base58-encoded-master-node-private-key (serialize-base58 :mainnet :private (:depth master-node-private-key)
                                                                  0 0
                                                                  (:chain-code master-node-private-key)
                                                                  (:private-key master-node-private-key))
         master-node-public-key (derive-path seed "m" :public)
+        serialized-master-node-public-key (serialize :mainnet :public (:depth master-node-public-key)
+                                                     0 0
+                                                     (:chain-code master-node-public-key)
+                                                     (:public-key master-node-public-key))
         base58-encoded-master-node-public-key (serialize-base58 :mainnet :public (:depth master-node-public-key)
                                                                 0 0
                                                                 (:chain-code master-node-public-key)
@@ -557,6 +565,26 @@
            base58-encoded-master-node-private-key))
     (is (= "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUapSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB"
            base58-encoded-master-node-public-key))
+    (is (= "bd16bee53961a47d6ad888e29545434a89bdfe95"
+           (codecs/bytes->hex (key-identifier (:public-key master-node)))))
+    (is (= (Long/parseLong "bd16bee5" 16)
+           (key-fingerprint (:public-key master-node))))
+    (is (= "1JEoxevbLLG8cVqeoGKQiAwoWbNYSUyYjg"
+           (encode-base58 (byte-array (codecs/hex->bytes
+                                        (str "00" (codecs/bytes->hex
+                                                    (key-identifier (:public-key master-node)))))))))
+    (is (= "4b03d6fc340455b363f51020ad3ecca4f0850280cf436c70c727923f6db46c3e"
+           (:private-key master-node)))
+    (is (= "KyjXhyHF9wTphBkfpxjL8hkDXDUSbE3tKANT94kXSyh6vn6nKaoy"
+           (privatekey->wif (:private-key master-node) :mainnet true)))
+    (is (= "03cbcaa9c98c877a26977d00825c956a238e8dddfbd322cce4f74b0b5bd6ace4a7"
+           (:public-key master-node)))
+    (is (= "60499f801b896d83179a4374aeb7822aaeaceaa0db1f85ee3e904c4defbd9689"
+           (:chain-code master-node)))
+    (is (= "0488b21e00000000000000000060499f801b896d83179a4374aeb7822aaeaceaa0db1f85ee3e904c4defbd968903cbcaa9c98c877a26977d00825c956a238e8dddfbd322cce4f74b0b5bd6ace4a7"
+           serialized-master-node-public-key))
+    (is (= "0488ade400000000000000000060499f801b896d83179a4374aeb7822aaeaceaa0db1f85ee3e904c4defbd9689004b03d6fc340455b363f51020ad3ecca4f0850280cf436c70c727923f6db46c3e"
+           serialized-master-node-private-key))
     ;; Chain m/0
     (is (= "xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQRUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt"
            base58-encoded-child-private-key))
