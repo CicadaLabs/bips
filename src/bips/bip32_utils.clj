@@ -45,6 +45,9 @@
          "03")
        (apply str (take 64 K))))
 
+(defn private-key->32-bytes [k]
+  (str (apply str (take (- 64 (count k)) (repeat "0"))) k))
+
 (defn private-key->33-bytes [k]
   (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
 

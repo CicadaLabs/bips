@@ -8,6 +8,7 @@
                               CURVE_PARAMS
                               decompressKey
                               hardened hardened?
+                              private-key->32-bytes
                               private-key->33-bytes
                               private->public-key]]
     [clojure.string :as str])
@@ -25,7 +26,7 @@
               (>= (.compareTo (BigInteger. private-key 16)
                               (.getN CURVE_PARAMS)) 0))
       (throw (Exception. "the master key is invalid.")))
-    {:private-key private-key
+    {:private-key (private-key->32-bytes private-key)
      :public-key (compress-public-key (.toString (private->public-key
                                                    (BigInteger. private-key 16)) 16))
      :chain-code (apply str (take-last 64 master-code))
@@ -54,7 +55,7 @@
     (when (or (>= (.compareTo (BigInteger. 1 IL) (.getN CURVE_PARAMS)) 0)
               (= 0 (.compareTo BigInteger/ZERO ki)))
       (throw (Exception. "key is invalid, proceed with the next value for i.")))
-    {:private-key (.toString ki 16)
+    {:private-key (private-key->32-bytes (.toString ki 16))
      :chain-code (codecs/bytes->hex IR)
      :index index
      :depth (+ depth 1)}))
