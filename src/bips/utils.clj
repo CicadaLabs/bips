@@ -101,7 +101,7 @@
        (map #(reduce str %))
        (map #(Integer/parseInt % 2))
        byte-array
-       digest/sha256
+       digest/sha-256
        (#(str/split % #""))
        (partition 2)
        (map #(reduce str %))
