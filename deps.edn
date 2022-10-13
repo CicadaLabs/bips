@@ -3,6 +3,7 @@
   org.apache.commons/commons-lang3 {:mvn/version "3.12.0"},
   org.bouncycastle/bcprov-jdk15on {:mvn/version "1.69"},
   org.clj-commons/digest {:mvn/version "1.4.100"},
+  org.clojure/data.json {:mvn/version "2.4.0"},
   },
 
  :paths ["src/"],
