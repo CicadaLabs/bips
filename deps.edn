@@ -20,6 +20,11 @@
                      slipset/deps-deploy {:mvn/version "RELEASE"}}
               :ns-default build}
 
+  ;; cljstyle checker
+  :run/cljstyle
+  {:replace-deps {mvxcvi/cljstyle {:mvn/version "0.15.0"}}
+   :main-opts    ["-m" "cljstyle.main"]}
+
   ;; Test runner
   :run/test {:extra-paths ["test"],
              :extra-deps
