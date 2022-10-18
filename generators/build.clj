@@ -1,7 +1,8 @@
 (ns build
-  (:require [clojure.tools.build.api :as tools]
-            [deps-deploy.deps-deploy :as deploy]
-            [clojure.pprint :as pp]))
+  (:require
+    [clojure.pprint :as pp]
+    [clojure.tools.build.api :as tools]
+    [deps-deploy.deps-deploy :as deploy]))
 
 (def lib 'org.clojars.cicadabank/proposals)
 (def version "0.1")

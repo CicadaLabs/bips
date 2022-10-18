@@ -1,11 +1,12 @@
 (ns test-vectors-utils
   (:require
-   [clojure.test :as t]
-   [clojure.data.json :as json]
-   [clojure.edn :as edn]))
+    [clojure.data.json :as json]
+    [clojure.edn :as edn]
+    [clojure.test :as t]))
 
-(def test-vectors (atom {:english []
-                         :japanese []}))
+(def test-vectors
+  (atom {:english []
+         :japanese []}))
 
 ;; https://github.com/trezor/python-mnemonic/blob/master/vectors.json
 (def test-vectors-en
