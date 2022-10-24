@@ -5,7 +5,9 @@
     [deps-deploy.deps-deploy :as deploy]))
 
 (def lib 'org.clojars.cicadabank/bips)
+
 (def version "0.1")
+
 (def class-dir "classes")
 (def basis (tools/create-basis {:project "deps.edn"}))
 (def jar-file (format "%s-%s.jar" (name lib) version))

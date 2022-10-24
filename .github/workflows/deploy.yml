@@ -1,0 +1,48 @@
+name: Push to Clojars
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  push-to-clojars:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Clojure
+      uses: DeLaGuardo/setup-clojure@5.0
+      with:
+        cli: 1.11.1.1113
+        lein: 2.9.8
+
+    - name: Cache clojure dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.m2/repository
+          ~/.deps.clj
+        # List all files containing dependencies:
+        key: cljdeps-${{ hashFiles('deps.edn') }}
+        restore-keys: cljdeps-
+
+    - name: Set TAG env variable
+      run: echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+    - name: Build JAR
+      env:
+        TAG: ${{ env.TAG }}
+      run: clojure -T:generator jar
+
+    - name: Deploy to Clojars
+      env:
+        CLOJARS_USERNAME: ${{ secrets.CLOJARS_LOGIN }}
+        CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
+        GPG_SECRET_KEYS: ${{ secrets.GPG_SECRET_KEYS }}
+      run: |
+           echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
+           echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+           clojure -T:generator deploy
