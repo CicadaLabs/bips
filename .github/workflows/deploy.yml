@@ -28,13 +28,15 @@ jobs:
         key: cljdeps-${{ hashFiles('deps.edn') }}
         restore-keys: cljdeps-
 
+    - name: Setup babashka
+      run: |
+        curl -L  https://github.com/borkdude/babashka/releases/download/v0.2.5/babashka-0.2.5-linux-amd64.zip -o bb.zip
+        unzip bb.zip
+        chmod +x bb
+        sudo mv bb /usr/bin
+
     - name: Set TAG env variable
       run: echo "TAG=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-    - name: Build JAR
-      env:
-        TAG: ${{ env.TAG }}
-      run: clojure -T:generator jar
 
     - name: Deploy to Clojars
       env:
@@ -42,7 +44,5 @@ jobs:
         CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
         GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
         GPG_SECRET_KEYS: ${{ secrets.GPG_SECRET_KEYS }}
-      run: |
-           echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
-           echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
-           clojure -T:generator deploy
+        TAG: ${{ env.TAG }}
+      run: /usr/bin/bb ./generators/deploy.clj

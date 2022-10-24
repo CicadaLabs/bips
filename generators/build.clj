@@ -48,16 +48,3 @@
                   :class-dir  class-dir}))
 
 (def jar-n-install (comp install jar))
-
-;; Improve it to accept gpg keys
-;; see https://github.com/Flexiana/framework/blob/main/.github/clojars_deploy.clj
-;; GPG_SECRET_KEYS, GPG_OWNERTRUST, CLOJARS_LOGIN and CLOJARS_PASSWORD
-(defn deploy
-  "Deploy the JAR artifact to Clojars repository."
-  [_]
-  (deploy/deploy {:installer :remote
-                  :artifact (str target-dir jar-file)
-                  :sign-releases? true
-                  :sign-key-id gpg-keys
-                  :pom-file (tools/pom-path {:lib lib
-                                             :class-dir (str target-dir class-dir)})}))
