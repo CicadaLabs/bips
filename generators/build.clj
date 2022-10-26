@@ -1,11 +1,16 @@
 (ns build
   (:require
+    [clojure.edn :as edn]
     [clojure.pprint :as pp]
     [clojure.tools.build.api :as tools]))
 
-(def lib 'org.clojars.cicadabank/bips)
+(def release-edn
+  (edn/read-string (slurp "release.edn")))
 
-(def version "0.1")
+;; TODO: how to define that using release-edn?
+(def lib 'com.cicadabank/bips)
+
+(def version (:version release-edn))
 
 (def class-dir "classes")
 (def basis (tools/create-basis {:project "deps.edn"}))
