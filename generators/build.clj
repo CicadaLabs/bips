@@ -1,8 +1,7 @@
 (ns build
   (:require
     [clojure.pprint :as pp]
-    [clojure.tools.build.api :as tools]
-    [deps-deploy.deps-deploy :as deploy]))
+    [clojure.tools.build.api :as tools]))
 
 (def lib 'org.clojars.cicadabank/bips)
 
