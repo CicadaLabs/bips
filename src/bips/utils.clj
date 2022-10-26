@@ -1,6 +1,7 @@
 (ns bips.utils
   (:require
     [clj-commons.digest :as digest]
+    [clojure.java.io :as io]
     [clojure.set]
     [clojure.string :as str])
   (:import
@@ -17,7 +18,8 @@
   [language]
   (when (not (.contains languages language))
     (throw (Exception. "Languaged not supported.")))
-  (-> (str "resources/" language ".txt")
+  (-> (str "dictionary/" language ".txt")
+      io/resource
       slurp
       (str/split #"\n")))
 

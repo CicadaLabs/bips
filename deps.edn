@@ -5,8 +5,7 @@
   org.clj-commons/digest {:mvn/version "1.4.100"},
   org.clojure/data.json {:mvn/version "2.4.0"},},
 
- :paths ["src/"],
- :resource-paths ["resources"],
+ :paths ["src/" "resources/"],
 
  ;; Remote Repositories
  :mvn/repos {"central" {:url "https://repo1.maven.org/maven2/"}
