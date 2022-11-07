@@ -16,6 +16,8 @@
     java.math.BigInteger))
 
 (defn derive-master-node
+  "Master key generation
+  Reference: `https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#master-key-generation`"
   [seed]
   (let [master-code
         (codecs/bytes->hex
@@ -32,9 +34,12 @@
      :chain-code (apply str (take-last 64 master-code))
      :depth 0}))
 
-(defn CKDpriv [{k-par :private-key
-                c-par :chain-code
-                depth :depth} index]
+(defn CKDpriv
+  "Private parent key → private child key
+  Reference: `https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#private-parent-key--private-child-key`"
+  [{k-par :private-key
+    c-par :chain-code
+    depth :depth} index]
   (let [K-par (compress-public-key
                 (.toString (private->public-key
                              (BigInteger. (apply str k-par)
@@ -60,9 +65,12 @@
      :index index
      :depth (+ depth 1)}))
 
-(defn CKDpub [{K-par :public-key
-               c-par :chain-code
-               depth :depth} index]
+(defn CKDpub
+  "Public parent key → public child key
+  Reference: `https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#public-parent-key--public-child-key`"
+  [{K-par :public-key
+    c-par :chain-code
+    depth :depth} index]
   (if (>= index (hardened 0))
     (throw (Exception. "Cannot derive a public key for hardened child keys."))
     (let [I (mac/hash (codecs/hex->bytes (str K-par
@@ -83,10 +91,13 @@
        :index index
        :depth (+ depth 1)})))
 
-(defn N [{k-par :private-key
-          c-par :chain-code
-          index :index
-          depth :depth}]
+(defn N
+  "Private parent key → public child key
+  Reference: `https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#private-parent-key--public-child-key`"
+  [{k-par :private-key
+    c-par :chain-code
+    index :index
+    depth :depth}]
   {:public-key (compress-public-key
                  (.toString
                    (private->public-key
@@ -95,7 +106,15 @@
    :index index
    :depth depth})
 
-(defmacro derive-path [seed chain-path key-type]
+(defmacro derive-path
+  "Derive a public/private key from a seed and a derivation path.
+  e.g. (derive-path \"000102030405060708090a0b0c0d0e0f\" \"m/0H/1/2H/2/1000000000\" :private) → `{:private-key
+  \"471b76e389e528d6de6d816857e012c5455051cad6660850e58372a6c3e6e7c8\",
+  :chain-code
+  \"c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e\",
+  :index 1000000000,
+  :depth 5}`"
+  [seed chain-path key-type]
   (let [path-parts (str/split chain-path #"/")]
     (loop [current-node (if (= "m" (first path-parts))
                           `(derive-master-node ~seed)

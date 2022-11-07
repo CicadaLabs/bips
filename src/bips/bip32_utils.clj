@@ -16,9 +16,12 @@
     (org.bouncycastle.math.ec
       FixedPointCombMultiplier)))
 
-(def CURVE_PARAMS (CustomNamedCurves/getByName "secp256k1"))
+(def CURVE_PARAMS
+  "parameters of the secp256k1 curve"
+  (CustomNamedCurves/getByName "secp256k1"))
 
 (def CURVE
+  "secp256k1 curve"
   (new ECDomainParameters
        (.getCurve CURVE_PARAMS)
        (.getG CURVE_PARAMS)
@@ -26,12 +29,16 @@
        (.getH CURVE_PARAMS)))
 
 (def version-bytes
+  "version bytes for encoding private/public keys"
   {:mainnet {:public "0488b21e"
              :private "0488ade4"}
    :testnet {:public "043587cf"
              :private "04358394"}})
 
-(defn sha256hash160 [input]
+(defn sha256hash160
+  "Calculates `RIPEMD160(SHA256(input))`. This is used in Address calculations.
+  Reference: `https://github.com/bitcoinj/bitcoinj/blob/master/core/src/main/java/org/bitcoinj/core/Utils.java#L70`"
+  [input]
   (let [sha256 (hash/sha256 input)
         digest (new RIPEMD160Digest)
         output (byte-array 20)]
@@ -39,19 +46,31 @@
     (.doFinal digest output 0)
     output))
 
-(defn compress-public-key [K]
+(defn compress-public-key
+  "Compress a public key `K`.
+  Start with `02` if the Y part of the public key is even and `03` otherwise."
+  [K]
   (str (if (= 0 (mod (nth (codecs/hex->bytes K) 63) 2))
          "02"
          "03")
        (apply str (take 64 K))))
 
-(defn private-key->32-bytes [k]
+(defn private-key->32-bytes
+  "Pad 0s into a private key to have 32 bytes."
+  [k]
   (str (apply str (take (- 64 (count k)) (repeat "0"))) k))
 
-(defn private-key->33-bytes [k]
+(defn private-key->33-bytes
+  "Pad 0s into a private key to have 33 bytes."
+  [k]
   (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
 
-(defn decompressKey [xBN yBit]
+(defn decompressKey
+  "Decompress a compressed public key (x co-ord and low-bit of y-coord)..
+  `xBN`: public key in BigInteger format.
+  `yBit`: parity bit `0x02` if the Y is even and `0x03` otherwise.
+  Reference: `https://github.com/web3j/web3j/blob/master/crypto/src/main/java/org/web3j/crypto/Sign.java#L208`"
+  [xBN yBit]
   (let [x9 (new X9IntegerConverter)
         compEnc (.integerToBytes x9 xBN (+ 1 (.getByteLength x9 (.getCurve CURVE))))]
     (aset-byte compEnc 0 (if yBit
@@ -59,7 +78,10 @@
                            0x03))
     (.decodePoint (.getCurve CURVE) compEnc)))
 
-(defn serialize [network type depth fingerprint child-number chain-code key-data]
+(defn serialize
+  "Serialize a key.
+  Reference: `https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#serialization-format`"
+  [network type depth fingerprint child-number chain-code key-data]
   (str (get-in version-bytes [network type])
        (format "%02x" depth)
        (format "%08x" fingerprint)
@@ -69,27 +91,27 @@
          key-data
          (private-key->33-bytes key-data))))
 
-(defn serialize-base58 [network type depth fingerprint
-                        child-number chain-code key-data]
-  (let [encoded-key (str (get-in version-bytes [network type])
-                         (format "%02x" depth)
-                         (format "%08x" fingerprint)
-                         (format "%08x" child-number)
-                         chain-code
-                         (if (= :public type)
-                           key-data
-                           (private-key->33-bytes key-data)))
+(defn serialize-base58
+  "Serialize a key into base58."
+  [network type depth fingerprint
+   child-number chain-code key-data]
+  (let [encoded-key (serialize network type depth fingerprint child-number
+                               chain-code key-data)
         key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256
                                                    (byte-array (codecs/hex->bytes encoded-key)))))]
     (b58/encode (codecs/hex->bytes (str encoded-key
                                         (apply str (take 8 key-hash)))))))
 
-(defn encode-base58 [master-key]
+(defn encode-base58
+  "Encode a serialized key into base58."
+  [master-key]
   (let [key-hash (codecs/bytes->hex (hash/sha256 (hash/sha256 master-key)))]
     (b58/encode (codecs/hex->bytes (str (codecs/bytes->hex master-key)
                                         (apply str (take 8 key-hash)))))))
 
-(defn deserialize-base58 [encoded-key]
+(defn deserialize-base58
+  "Deserialize a base58 encoded key."
+  [encoded-key]
   (let [decoded-key (b58/decode encoded-key)
         _ (when (> (count decoded-key) 82)
             (throw (Exception. "Found unexpected data in key")))
@@ -199,44 +221,70 @@
                     key-data
                     nil)}))
 
-(defn key-identifier [K]
+(defn key-identifier
+  "Compute the identifier of a public key `K`."
+  [K]
   (sha256hash160 (codecs/hex->bytes K)))
 
-(defn key-fingerprint [K]
+(defn key-fingerprint
+  "Compute the fingerprint of a public key `K`.
+  Reference: `https://github.com/web3j/web3j/blob/49fe2c4e2d9d325ec465879736d6c384f41a4115/crypto/src/main/java/org/web3j/crypto/Bip32ECKeyPair.java#L131`"
+  [K]
   (let [identifier (key-identifier K)]
     (bit-or (bit-and (nth identifier 3) 0xFF)
             (bit-shift-left (bit-and (nth identifier 2) 0xFF) 8)
             (bit-shift-left (bit-and (nth identifier 1) 0xFF) 16)
             (bit-shift-left (bit-and (first identifier) 0xFF) 24))))
 
-(defn hardened [index]
+(defn hardened
+  "Return the a hardened index."
+  [index]
   (+ (math/expt 2 31) index))
 
-(defn hardened? [path-part]
+(defn hardened?
+  "Tell if part of a path is hardened (terminated by H)."
+  [path-part]
   (= \H (last (char-array path-part))))
 
-(defn private->public-point [privKey]
+(defn private->public-point
+  "Returns public key point from the given private key.
+  Reference: `https://github.com/web3j/web3j/blob/master/crypto/src/main/java/org/web3j/crypto/Sign.java#L335`"
+  [privKey]
   (if (> (.bitLength privKey) (.bitLength (.getN CURVE)))
     (.multiply (FixedPointCombMultiplier.) (.getG CURVE) (.mod privKey (.getN CURVE)))
     (.multiply (FixedPointCombMultiplier.) (.getG CURVE) privKey)))
 
-(defn private->public-key [privKey]
+(defn private->public-key
+  "Compute a public key from the given private key.
+  Reference: `https://github.com/web3j/web3j/blob/master/crypto/src/main/java/org/web3j/crypto/Sign.java#L322`"
+  [privKey]
   (let [point (private->public-point privKey)
         encoded (.getEncoded point false)]
     (BigInteger. 1 (byte-array (take-last (- (count encoded) 1) encoded)))))
 
-(defn group-add [k-par IL]
+(defn group-add
+  "Field addition of two numbers.
+  The result is `k-par` + `IL` mod `N`."
+  [k-par IL]
   (.mod (.add (BigInteger. k-par 16)
               (BigInteger. 1 IL))
         (.getN CURVE_PARAMS)))
 
-(defn add-point [Ki IL]
+(defn add-point
+  "Add two points in the curve.
+  `Ki` is a compressed public key.
+  `IL` is a private key."
+  [Ki IL]
   (.add
     (private->public-point (BigInteger. 1 IL))
     (decompressKey (BigInteger. (apply str Ki) 16)
                    (= 0 (mod (nth (codecs/hex->bytes Ki) 0) 2)))))
 
-(defn legacy-address [K network]
+(defn legacy-address
+  "Encode a public key into a legacy Bitcoin address.
+  `K` is the public key.
+  `network` is either `:mainet` or `:testnet`."
+  [K network]
   (encode-base58 (byte-array (codecs/hex->bytes
                                (str (case network
                                       :mainnet "00"
