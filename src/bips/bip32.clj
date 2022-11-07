@@ -1,7 +1,5 @@
 (ns bips.bip32
   (:require
-    [buddy.core.codecs :as codecs]
-    [buddy.core.mac :as mac]
     [bips.bip32-utils :refer [add-point
                               compress-public-key
                               group-add
@@ -11,6 +9,8 @@
                               private-key->32-bytes
                               private-key->33-bytes
                               private->public-key]]
+    [buddy.core.codecs :as codecs]
+    [buddy.core.mac :as mac]
     [clojure.string :as str])
   (:import
     java.math.BigInteger))

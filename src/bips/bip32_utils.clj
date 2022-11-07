@@ -235,3 +235,12 @@
     (private->public-point (BigInteger. 1 IL))
     (decompressKey (BigInteger. (apply str Ki) 16)
                    (= 0 (mod (nth (codecs/hex->bytes Ki) 0) 2)))))
+
+(defn legacy-address [K network]
+  (encode-base58 (byte-array (codecs/hex->bytes
+                               (str (case network
+                                      :mainnet "00"
+                                      :testnet "6f"
+                                      (throw (Exception. (format "Unknown network %s" network))))
+                                    (codecs/bytes->hex
+                                      (key-identifier K)))))))

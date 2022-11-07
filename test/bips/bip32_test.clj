@@ -1,6 +1,5 @@
 (ns bips.bip32-test
   (:require
-    [buddy.core.codecs :as codecs]
     [bips.bip32 :refer [derive-master-node
                         CKDpriv
                         CKDpub
@@ -11,12 +10,14 @@
                               group-add
                               hardened
                               key-fingerprint
+                              legacy-address
                               deserialize-base58
                               serialize
                               key-identifier
                               serialize-base58
                               encode-base58]]
     [bips.btc-utils :refer [privatekey->wif]]
+    [buddy.core.codecs :as codecs]
     [clojure.test :refer [deftest is]]))
 
 (deftest test-vector-1
@@ -227,9 +228,7 @@
     (is (= (Long/parseLong "3442193e" 16)
            (key-fingerprint (:public-key master-node))))
     (is (= "15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma"
-           (encode-base58 (byte-array (codecs/hex->bytes
-                                        (str "00" (codecs/bytes->hex
-                                                    (key-identifier (:public-key master-node)))))))))
+           (legacy-address (:public-key master-node) :mainnet)))
     (is (= "e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35"
            (:private-key master-node)))
     (is (= "L52XzL2cMkHxqxBXRyEpnPQZGUs3uKiL3R11XbAdHigRzDozKZeW"
@@ -257,9 +256,7 @@
     (is (= (Long/parseLong "5c1bd648" 16)
            (key-fingerprint (:public-key neutered-child))))
     (is (= "19Q2WoS5hSS6T8GjhK8KZLMgmWaq4neXrh"
-           (encode-base58 (byte-array (codecs/hex->bytes
-                                        (str "00" (codecs/bytes->hex
-                                                    (key-identifier (:public-key neutered-child)))))))))
+           (legacy-address (:public-key neutered-child) :mainnet)))
     (is (= "edb2e14f9ee77d26dd93b4ecede8d16ed408ce149b6cd80b0715a2d911a0afea"
            (:private-key child)))
     (is (= "L5BmPijJjrKbiUfG4zbiFKNqkvuJ8usooJmzuD7Z8dkRoTThYnAT"
@@ -288,10 +285,7 @@
     (is (= (Long/parseLong "bef5a2f9" 16)
            (key-fingerprint (:public-key neutered-grandchild))))
     (is (= "1JQheacLPdM5ySCkrZkV66G2ApAXe1mqLj"
-           (encode-base58 (byte-array (codecs/hex->bytes
-                                        (str "00" (codecs/bytes->hex
-                                                    (key-identifier
-                                                      (:public-key neutered-grandchild)))))))))
+           (legacy-address (:public-key neutered-grandchild) :mainnet)))
     (is (= "3c6cb8d0f6a264c91ea8b5030fadaa8e538b020f0a387421a12de9319dc93368"
            (:private-key grandchild)))
     (is (= "KyFAjQ5rgrKvhXvNMtFB5PCSKUYD1yyPEe3xr3T34TZSUHycXtMM"
@@ -320,10 +314,7 @@
     (is (= (Long/parseLong "ee7ab90c" 16)
            (key-fingerprint (:public-key neutered-great-grandchild))))
     (is (= "1NjxqbA9aZWnh17q1UW3rB4EPu79wDXj7x"
-           (encode-base58 (codecs/hex->bytes
-                            (str "00"
-                                 (codecs/bytes->hex
-                                   (key-identifier (:public-key neutered-great-grandchild))))))))
+           (legacy-address (:public-key neutered-great-grandchild) :mainnet)))
     (is (= "cbce0d719ecf7431d88e6a89fa1483e02e35092af60c042b1df2ff59fa424dca"
            (:private-key great-grandchild)))
     (is (= "L43t3od1Gh7Lj55Bzjj1xDAgJDcL7YFo2nEcNaMGiyRZS1CidBVU"
@@ -352,10 +343,7 @@
     (is (= (Long/parseLong "d880d7d8" 16)
            (key-fingerprint (:public-key neutered-great-great-grandchild))))
     (is (= "1LjmJcdPnDHhNTUgrWyhLGnRDKxQjoxAgt"
-           (encode-base58 (codecs/hex->bytes
-                            (str "00"
-                                 (codecs/bytes->hex
-                                   (key-identifier (:public-key neutered-great-great-grandchild))))))))
+           (legacy-address (:public-key neutered-great-great-grandchild) :mainnet)))
     (is (= "0f479245fb19a38a1954c5c7c0ebab2f9bdfd96a17563ef28a6a4b1a2a764ef4"
            (:private-key great-great-grandchild)))
     (is (= "KwjQsVuMjbCP2Zmr3VaFaStav7NvevwjvvkqrWd5Qmh1XVnCteBR"
@@ -384,10 +372,7 @@
     (is (= (Long/parseLong "d69aa102" 16)
            (key-fingerprint (:public-key neutered-great-great-great-grandchild))))
     (is (= "1LZiqrop2HGR4qrH1ULZPyBpU6AUP49Uam"
-           (encode-base58 (codecs/hex->bytes
-                            (str "00"
-                                 (codecs/bytes->hex
-                                   (key-identifier (:public-key neutered-great-great-great-grandchild))))))))
+           (legacy-address (:public-key neutered-great-great-great-grandchild) :mainnet)))
     (is (= "471b76e389e528d6de6d816857e012c5455051cad6660850e58372a6c3e6e7c8"
            (:private-key great-great-great-grandchild)))
     (is (= "Kybw8izYevo5xMh1TK7aUr7jHFCxXS1zv8p3oqFz3o2zFbhRXHYs"
@@ -611,9 +596,7 @@
     (is (= (Long/parseLong "bd16bee5" 16)
            (key-fingerprint (:public-key master-node))))
     (is (= "1JEoxevbLLG8cVqeoGKQiAwoWbNYSUyYjg"
-           (encode-base58 (byte-array (codecs/hex->bytes
-                                        (str "00" (codecs/bytes->hex
-                                                    (key-identifier (:public-key master-node)))))))))
+           (legacy-address (:public-key master-node) :mainnet)))
     (is (= "4b03d6fc340455b363f51020ad3ecca4f0850280cf436c70c727923f6db46c3e"
            (:private-key master-node)))
     (is (= "KyjXhyHF9wTphBkfpxjL8hkDXDUSbE3tKANT94kXSyh6vn6nKaoy"
@@ -642,9 +625,7 @@
     (is (= (Long/parseLong "5a61ff8e" 16)
            (key-fingerprint (:public-key neutered-child))))
     (is (= "19EuDJdgfRkwCmRzbzVBHZWQG9QNWhftbZ"
-           (encode-base58 (byte-array (codecs/hex->bytes
-                                        (str "00" (codecs/bytes->hex
-                                                    (key-identifier (:public-key neutered-child)))))))))
+           (legacy-address (:public-key neutered-child) :mainnet)))
     (is (= "abe74a98f6c7eabee0428f53798f0ab8aa1bd37873999041703c742f15ac7e1e"
            (:private-key child)))
     (is (= "L2ysLrR6KMSAtx7uPqmYpoTeiRzydXBattRXjXz5GDFPrdfPzKbj"
@@ -673,9 +654,7 @@
     (is (= (Long/parseLong "d8ab4937" 16)
            (key-fingerprint (:public-key neutered-grandchild))))
     (is (= "1Lke9bXGhn5VPrBuXgN12uGUphrttUErmk"
-           (encode-base58 (byte-array (codecs/hex->bytes
-                                        (str "00" (codecs/bytes->hex
-                                                    (key-identifier (:public-key neutered-grandchild)))))))))
+           (legacy-address (:public-key neutered-grandchild) :mainnet)))
     (is (= "877c779ad9687164e9c2f4f0f4ff0340814392330693ce95a58fe18fd52e6e93"
            (:private-key grandchild)))
     (is (= "L1m5VpbXmMp57P3knskwhoMTLdhAAaXiHvnGLMribbfwzVRpz2Sr"
@@ -704,9 +683,7 @@
     (is (= (Long/parseLong "78412e3a" 16)
            (key-fingerprint (:public-key neutered-great-grandchild))))
     (is (= "1BxrAr2pHpeBheusmd6fHDP2tSLAUa3qsW"
-           (encode-base58 (codecs/hex->bytes
-                            (str "00"
-                                 (codecs/bytes->hex (key-identifier (:public-key neutered-great-grandchild))))))))
+           (legacy-address (:public-key neutered-great-grandchild) :mainnet)))
     (is (= "704addf544a06e5ee4bea37098463c23613da32020d604506da8c0518e1da4b7"
            (:private-key great-grandchild)))
     (is (= "KzyzXnznxSv249b4KuNkBwowaN3akiNeEHy5FWoPCJpStZbEKXN2"
@@ -733,9 +710,7 @@
     (is (= (Long/parseLong "31a507b8" 16)
            (key-fingerprint (:public-key neutered-great-great-grandchild))))
     (is (= "15XVotxCAV7sRx1PSCkQNsGw3W9jT9A94R"
-           (encode-base58 (codecs/hex->bytes
-                            (str "00"
-                                 (codecs/bytes->hex (key-identifier (:public-key neutered-great-great-grandchild))))))))
+           (legacy-address (:public-key neutered-great-great-grandchild) :mainnet)))
     (is (= "f1c7c871a54a804afe328b4c83a1c33b8e5ff48f5087273f04efa83b247d6a2d"
            (:private-key great-great-grandchild)))
     (is (= "L5KhaMvPYRW1ZoFmRjUtxxPypQ94m6BcDrPhqArhggdaTbbAFJEF"
@@ -764,9 +739,7 @@
     (is (= (Long/parseLong "26132fdb" 16)
            (key-fingerprint (:public-key neutered-great-great-great-grandchild))))
     (is (= "14UKfRV9ZPUp6ZC9PLhqbRtxdihW9em3xt"
-           (encode-base58 (codecs/hex->bytes
-                            (str "00"
-                                 (codecs/bytes->hex (key-identifier (:public-key neutered-great-great-great-grandchild))))))))
+           (legacy-address (:public-key neutered-great-great-great-grandchild) :mainnet)))
     (is (= "bb7d39bdb83ecf58f2fd82b6d918341cbef428661ef01ab97c28a4842125ac23"
            (:private-key great-great-great-grandchild)))
     (is (= "L3WAYNAZPxx1fr7KCz7GN9nD5qMBnNiqEJNJMU1z9MMaannAt4aK"
