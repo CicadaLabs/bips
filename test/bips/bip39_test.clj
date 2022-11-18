@@ -51,8 +51,8 @@
   [name ns test-fn & [metadata]]
   (intern ns (with-meta (symbol name) (merge metadata {:test #(test-fn)})) (fn [])))
 
-(defmacro gen-test-vector [n tv]
-  `(deftest n
+(defmacro gen-test-vector [tv]
+  `(fn []
      (let [entropy# (:entropy ~tv)
            mnemonic# (:mnemonic ~tv)
            seed# (:seed ~tv)
@@ -64,8 +64,8 @@
               (mnemonic->seed mnemonic# passphrase#)))
        (is (check-mnemonic mnemonic#)))))
 
-(defmacro gen-test-vector-jp [n tv]
-  `(deftest n
+(defmacro gen-test-vector-jp [tv]
+  `(fn []
      (let [entropy# (:entropy ~tv)
            mnemonic# (java.text.Normalizer/normalize (:mnemonic ~tv)
                                                      java.text.Normalizer$Form/NFKD)
@@ -82,13 +82,13 @@
   (let [tv (nth test-vectors-en i)]
     (add-test (symbol (str "test-vector-" i))
               (symbol (str *ns*))
-              (gen-test-vector (symbol (str "test-vector-" i)) tv))))
+              (gen-test-vector tv))))
 
 (doseq [i (range 0 (count test-vectors-jp))]
   (let [tv (nth test-vectors-jp i)]
     (add-test (symbol (str "test-vector-jp-" i))
               (symbol (str *ns*))
-              (gen-test-vector-jp (symbol (str "test-vector-jp-" i)) tv))))
+              (gen-test-vector-jp tv))))
 
 (comment
   (clojure.test/run-all-tests))
