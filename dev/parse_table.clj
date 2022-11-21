@@ -1,5 +1,6 @@
 (ns parse-table
-  (:require [clojure.string :as string]))
+  (:require
+    [clojure.string :as string]))
 
 ;; Reference: `https://github.com/yogthos/markdown-clj/blob/master/src/cljc/markdown/tables.cljc`
 (defn parse-table-row [text]
