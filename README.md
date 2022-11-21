@@ -7,6 +7,8 @@ BIP39
 Generate 12-25 words mnemonic seed from random 128-512 bits of random data
 and 512 bits seed from the mnemonic seed.
 
+![](./images/bip39-illustration.png)
+
 Examples
 --------
 
@@ -33,8 +35,31 @@ Reference
 BIP32
 =====
 
-Multi-Account Hierarchy for Deterministic Wallets
+BIP32 is the implementation of a Multi-Account Hierarchy for
+Deterministic Wallets ie. tree structure derived from a root seed
+phrase (entropy) and a hierachical set of indices.  A number of
+benefits follow:
 
+- An entire wallet can be backed up once by storing the wallet seed or
+  master extended private key, and all future addresses in the wallet
+  can be restored from it.
+- The creation of public and private ECDSA keys may be separated from
+  each other. That is, it is possible to create only the public ECDSA
+  key half (and receiving address) of an ECDSA key pair, without the
+  ability to create the private half. Thus, one can create receiving
+  addresses on a public facing system that if compromised would not
+  give the attacker the ability to spend bitcoin received at those
+  addresses. A separate, offline machine can generate the
+  corresponding private ECDSA keys and sign transactions.
+- Public and private ECDSA keys may be created in a hierarchy, and
+  control over or visibility of portions of the hierarchy may be
+  delegated to third parties. This has uses for auditing, for
+  separating ECDSA key sequences into different logical groups or
+  accounts, and for giving 3rd parties the ability to create spending
+  transactions without first getting a receiving address in advance.
+
+![](./images/key-derivation.png)
+  
 Examples
 --------
 
