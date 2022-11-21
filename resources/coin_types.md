@@ -1,0 +1,129 @@
+| 0          | 0x80000000                    | BTC     | Bitcoin                           |
+| 1          | 0x80000001                    |         | Testnet (all coins)               |
+| 2          | 0x80000002                    | LTC     | Litecoin                          |
+| 3          | 0x80000003                    | DOGE    | Dogecoin                          |
+| 4          | 0x80000004                    | RDD     | Reddcoin                          |
+| 5          | 0x80000005                    | DASH    | Dash                              |
+| 6          | 0x80000006                    | PPC     | Peercoin                          |
+| 7          | 0x80000007                    | NMC     | Namecoin                          |
+| 8          | 0x80000008                    | FTC     | Feathercoin                       |
+| 9          | 0x80000009                    | XCP     | Counterparty                      |
+| 10         | 0x8000000a                    | BLK     | Blackcoin                         |
+| 11         | 0x8000000b                    | NSR     | NuShares                          |
+| 12         | 0x8000000c                    | NBT     | NuBits                            |
+| 13         | 0x8000000d                    | MZC     | Mazacoin                          |
+| 14         | 0x8000000e                    | VIA     | Viacoin                           |
+| 15         | 0x8000000f                    | XCH     | ClearingHouse                     |
+| 16         | 0x80000010                    | RBY     | Rubycoin                          |
+| 17         | 0x80000011                    | GRS     | Groestlcoin                       |
+| 18         | 0x80000012                    | DGC     | Digitalcoin                       |
+| 19         | 0x80000013                    | CCN     | Cannacoin                         |
+| 20         | 0x80000014                    | DGB     | DigiByte                          |
+| 21         | 0x80000015                    |         | Open Assets                       |
+| 22         | 0x80000016                    | MONA    | Monacoin                          |
+| 23         | 0x80000017                    | CLAM    | Clams                             |
+| 24         | 0x80000018                    | XPM     | Primecoin                         |
+| 25         | 0x80000019                    | NEOS    | Neoscoin                          |
+| 26         | 0x8000001a                    | JBS     | Jumbucks                          |
+| 27         | 0x8000001b                    | ZRC     | ziftrCOIN                         |
+| 28         | 0x8000001c                    | VTC     | Vertcoin                          |
+| 29         | 0x8000001d                    | NXT     | NXT                               |
+| 30         | 0x8000001e                    | BURST   | Burst                             |
+| 31         | 0x8000001f                    | MUE     | MonetaryUnit                      |
+| 32         | 0x80000020                    | ZOOM    | Zoom                              |
+| 33         | 0x80000021                    | VASH    | Virtual Cash                      |
+| 34         | 0x80000022                    | CDN     | Canada eCoin                      |
+| 35         | 0x80000023                    | SDC     | ShadowCash                        |
+| 36         | 0x80000024                    | PKB     | ParkByte                          |
+| 37         | 0x80000025                    | PND     | Pandacoin                         |
+| 38         | 0x80000026                    | START   | StartCOIN                         |
+| 39         | 0x80000027                    | MOIN    | MOIN                              |
+| 40         | 0x80000028                    | EXP     | Expanse                           |
+| 41         | 0x80000029                    | EMC2    | Einsteinium                       |
+| 42         | 0x8000002a                    | DCR     | Decred                            |
+| 43         | 0x8000002b                    | XEM     | NEM                               |
+| 44         | 0x8000002c                    | PART    | Particl                           |
+| 45         | 0x8000002d                    | ARG     | Argentum (dead)                   |
+| 46         | 0x8000002e                    |         | Libertas                          |
+| 47         | 0x8000002f                    |         | Posw coin                         |
+| 48         | 0x80000030                    | SHR     | Shreeji                           |
+| 49         | 0x80000031                    | GCR     | Global Currency Reserve (GCRcoin) |
+| 50         | 0x80000032                    | NVC     | Novacoin                          |
+| 51         | 0x80000033                    | AC      | Asiacoin                          |
+| 52         | 0x80000034                    | BTCD    | BitcoinDark                       |
+| 53         | 0x80000035                    | DOPE    | Dopecoin                          |
+| 54         | 0x80000036                    | TPC     | Templecoin                        |
+| 55         | 0x80000037                    | AIB     | AIB                               |
+| 56         | 0x80000038                    | EDRC    | EDRCoin                           |
+| 57         | 0x80000039                    | SYS     | Syscoin                           |
+| 58         | 0x8000003a                    | SLR     | Solarcoin                         |
+| 59         | 0x8000003b                    | SMLY    | Smileycoin                        |
+| 60         | 0x8000003c                    | ETH     | Ether                             |
+| 61         | 0x8000003d                    | ETC     | Ether Classic                     |
+| 62         | 0x8000003e                    | PSB     | Pesobit                           |
+| 63         | 0x8000003f                    | LDCN    | Landcoin (dead)                   |
+| 64         | 0x80000040                    |         | Open Chain                        |
+| 65         | 0x80000041                    | XBC     | Bitcoinplus                       |
+| 66         | 0x80000042                    | IOP     | Internet of People                |
+| 67         | 0x80000043                    | NXS     | Nexus                             |
+| 68         | 0x80000044                    | INSN    | InsaneCoin                        |
+| 69         | 0x80000045                    | OK      | OKCash                            |
+| 70         | 0x80000046                    | BRIT    | BritCoin                          |
+| 71         | 0x80000047                    | CMP     | Compcoin                          |
+| 72         | 0x80000048                    | CRW     | Crown                             |
+| 73         | 0x80000049                    | BELA    | BelaCoin                          |
+| 74         | 0x8000004a                    | ICX     | ICON                              |
+| 75         | 0x8000004b                    | FJC     | FujiCoin                          |
+| 76         | 0x8000004c                    | MIX     | MIX                               |
+| 77         | 0x8000004d                    | XVG     | Verge Currency                    |
+| 78         | 0x8000004e                    | EFL     | Electronic Gulden                 |
+| 79         | 0x8000004f                    | CLUB    | ClubCoin                          |
+| 80         | 0x80000050                    | RICHX   | RichCoin                          |
+| 81         | 0x80000051                    | POT     | Potcoin                           |
+| 82         | 0x80000052                    | QRK     | Quarkcoin                         |
+| 83         | 0x80000053                    | TRC     | Terracoin                         |
+| 84         | 0x80000054                    | GRC     | Gridcoin                          |
+| 85         | 0x80000055                    | AUR     | Auroracoin                        |
+| 86         | 0x80000056                    | IXC     | IXCoin                            |
+| 87         | 0x80000057                    | NLG     | Gulden                            |
+| 88         | 0x80000058                    | BITB    | BitBean                           |
+| 89         | 0x80000059                    | BTA     | Bata                              |
+| 90         | 0x8000005a                    | XMY     | Myriadcoin                        |
+| 91         | 0x8000005b                    | BSD     | BitSend                           |
+| 92         | 0x8000005c                    | UNO     | Unobtanium                        |
+| 93         | 0x8000005d                    | MTR     | MasterTrader                      |
+| 94         | 0x8000005e                    | GB      | GoldBlocks                        |
+| 95         | 0x8000005f                    | SHM     | Saham                             |
+| 96         | 0x80000060                    | CRX     | Chronos                           |
+| 97         | 0x80000061                    | BIQ     | Ubiquoin                          |
+| 98         | 0x80000062                    | EVO     | Evotion                           |
+| 99         | 0x80000063                    | STO     | SaveTheOcean                      |
+| 100        | 0x80000064                    | BIGUP   | BigUp                             |
+| 101        | 0x80000065                    | GAME    | GameCredits                       |
+| 102        | 0x80000066                    | DLC     | Dollarcoins                       |
+| 103        | 0x80000067                    | ZYD     | Zayedcoin                         |
+| 104        | 0x80000068                    | DBIC    | Dubaicoin                         |
+| 105        | 0x80000069                    | STRAT   | Stratis                           |
+| 106        | 0x8000006a                    | SH      | Shilling                          |
+| 107        | 0x8000006b                    | MARS    | MarsCoin                          |
+| 108        | 0x8000006c                    | UBQ     | Ubiq                              |
+| 109        | 0x8000006d                    | PTC     | Pesetacoin                        |
+| 110        | 0x8000006e                    | NRO     | Neurocoin                         |
+| 111        | 0x8000006f                    | ARK     | ARK                               |
+| 112        | 0x80000070                    | USC     | UltimateSecureCashMain            |
+| 113        | 0x80000071                    | THC     | Hempcoin                          |
+| 114        | 0x80000072                    | LINX    | Linx                              |
+| 115        | 0x80000073                    | ECN     | Ecoin                             |
+| 116        | 0x80000074                    | DNR     | Denarius                          |
+| 117        | 0x80000075                    | PINK    | Pinkcoin                          |
+| 118        | 0x80000076                    | ATOM    | Atom                              |
+| 119        | 0x80000077                    | PIVX    | Pivx                              |
+| 120        | 0x80000078                    | FLASH   | Flashcoin                         |
+| 121        | 0x80000079                    | ZEN     | Zencash                           |
+| 122        | 0x8000007a                    | PUT     | Putincoin                         |
+| 123        | 0x8000007b                    | ZNY     | BitZeny                           |
+| 124        | 0x8000007c                    | UNIFY   | Unify                             |
+| 125        | 0x8000007d                    | XST     | StealthCoin                       |
+| 126        | 0x8000007e                    | BRK     | Breakout Coin                     |
+| 127        | 0x8000007f                    | VC      | Vcash                             |
+| 128        | 0x80000080                    | XMR     | Monero                            |
