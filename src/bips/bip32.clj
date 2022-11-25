@@ -6,8 +6,7 @@
                               CURVE_PARAMS
                               decompressKey
                               hardened hardened?
-                              private-key->32-bytes
-                              private-key->33-bytes
+                              ->32-bytes ->33-bytes
                               private->public-key]]
     [buddy.core.codecs :as codecs]
     [buddy.core.mac :as mac]
@@ -28,7 +27,7 @@
               (>= (.compareTo (BigInteger. private-key 16)
                               (.getN CURVE_PARAMS)) 0))
       (throw (Exception. "the master key is invalid.")))
-    {:private-key (private-key->32-bytes private-key)
+    {:private-key (->32-bytes private-key)
      :public-key (compress-public-key (.toString (private->public-key
                                                    (BigInteger. private-key 16)) 16))
      :chain-code (apply str (take-last 64 master-code))
@@ -46,7 +45,7 @@
                                           16))
                            16))
         I (if (>= index (hardened 0))
-            (mac/hash (codecs/hex->bytes (str (private-key->33-bytes k-par)
+            (mac/hash (codecs/hex->bytes (str (->33-bytes k-par)
                                               (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})
@@ -60,7 +59,7 @@
     (when (or (>= (.compareTo (BigInteger. 1 IL) (.getN CURVE_PARAMS)) 0)
               (= 0 (.compareTo BigInteger/ZERO ki)))
       (throw (Exception. "key is invalid, proceed with the next value for i.")))
-    {:private-key (private-key->32-bytes (.toString ki 16))
+    {:private-key (->32-bytes (.toString ki 16))
      :chain-code (codecs/bytes->hex IR)
      :index index
      :depth (+ depth 1)}))
