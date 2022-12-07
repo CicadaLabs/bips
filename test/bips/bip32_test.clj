@@ -1178,5 +1178,97 @@
     (is (= "tpubD6NzVbkrYhZ4WuxgZMdpw1Hvi7MKg6YDjDMXVohmZCFfF17hXBPYpc56rCY1KXFMovN29ik37nZimQseiykRTBTJTZJmjENyv2k3R12BJ1M"
            base58-encoded-master-node-public-key-testnet))))
 
+;; Test vector for https://github.com/CicadaBank/bips/issues/13
+(deftest test-vector-6
+  (let [seed "f949850abc48c908df447f2bc1e1f1a98a3e5a048571bda55ce9b56784f1dbccd12340ab013872a659f3bdfff16470bd1fbab9b05ba6ade5d52e36efea3a8e4d"
+        ;; Chain: m
+        master-node (derive-master-node seed)
+        master-private-key (:private-key master-node)
+        master-public-key (:public-key master-node)
+        master-chain-code (:chain-code master-node)
+        master-node-fingerprint (key-fingerprint master-public-key)
+        bip32-xprv-master-private-key (serialize-base58 :mainnet :private 0 0 0
+                                                        master-chain-code
+                                                        master-private-key)
+        bip32-xpub-master-public-key (serialize-base58 :mainnet :public 0 0 0
+                                                       master-chain-code
+                                                       master-public-key)
+        ;; Chain: m/44H
+        child-node (CKDpriv master-node (hardened 44))
+        child-private-key (:private-key child-node)
+        child-public-key (:public-key (N child-node))
+        child-chain-code (:chain-code child-node)
+        child-node-fingerprint (key-fingerprint child-public-key)
+        bip32-xprv-child-private-key (serialize-base58 :mainnet :private
+                                                       (:depth child-node)
+                                                       master-node-fingerprint
+                                                       (hardened 44)
+                                                       child-chain-code
+                                                       child-private-key)
+        bip32-xpub-child-public-key (serialize-base58 :mainnet :public
+                                                      (:depth child-node)
+                                                      master-node-fingerprint
+                                                      (hardened 44)
+                                                      child-chain-code
+                                                      child-public-key)
+        ;; Chain: m/44H/0H
+        grandchild-node (CKDpriv child-node (hardened 0))
+        grandchild-private-key (:private-key grandchild-node)
+        grandchild-public-key (:public-key (N grandchild-node))
+        grandchild-chain-code (:chain-code grandchild-node)
+        grandchild-node-fingerprint (key-fingerprint grandchild-public-key)
+        bip32-xprv-grandchild-private-key (serialize-base58 :mainnet :private
+                                                            (:depth grandchild-node)
+                                                            child-node-fingerprint
+                                                            (hardened 0)
+                                                            grandchild-chain-code
+                                                            grandchild-private-key)
+        bip32-xpub-grandchild-public-key (serialize-base58 :mainnet :public
+                                                           (:depth grandchild-node)
+                                                           child-node-fingerprint
+                                                           (hardened 0)
+                                                           grandchild-chain-code
+                                                           grandchild-public-key)
+        ;; Chain: m/44H/0H/0H
+        grand-grandchild-node (CKDpriv grandchild-node (hardened 0))
+        grand-grandchild-private-key (:private-key grand-grandchild-node)
+        grand-grandchild-public-key (:public-key (N grand-grandchild-node))
+        grand-grandchild-chain-code (:chain-code grand-grandchild-node)
+        bip32-xprv-grand-grandchild-private-key (serialize-base58 :mainnet :private
+                                                                  (:depth grand-grandchild-node)
+                                                                  grandchild-node-fingerprint
+                                                                  (hardened 0)
+                                                                  grand-grandchild-chain-code
+                                                                  grand-grandchild-private-key)
+        bip32-xpub-grand-grandchild-public-key (serialize-base58 :mainnet :public
+                                                                 (:depth grand-grandchild-node)
+                                                                 grandchild-node-fingerprint
+                                                                 (hardened 0)
+                                                                 grand-grandchild-chain-code
+                                                                 grand-grandchild-public-key)]
+    ;; Chain: m
+    (is (= "xprv9s21ZrQH143K39jyBqhmMnfUmrdCawvW71C5VEmCZhNKn9BKnpatEbMTUyvbSvmPReDfVuZ6zAfeuD7M6TzJiPFCgQEkHax4FFSCnVWRVJY"
+           bip32-xprv-master-private-key))
+    (is (= "xpub661MyMwAqRbcFdpSHsEmivcDKtTgzQeMUE7gHdAp82uJewWULMu8nPfwLFUJEY5Aag3VFP2La4n33RbRtVjnwcVkdQRafL8sxb7zKcxdURZ"
+           bip32-xpub-master-public-key))
+    (is (= "1d47cce7" (format "%x" master-node-fingerprint)))
+    ;; Chain: m/44H
+    (is (= "xprv9u7dR1X51to2TTxC41mr1TyT9FfpLJMUjDrzHL5kbkbqHXb7ncnCiD2j1snKogc3Wf4XBkd2oFdCZzjqjDhcxVt9sRVaMWFDuYTWfEKQVBz"
+           bip32-xprv-child-private-key))
+    (is (= "xpub686ypX3xrGMKfx2fA3JrNbvBhHWJjm5L6Snb5iVNA68pAKvGLA6TG1MCs87Y3yCEhiukunYMaKNKEowKLGMM685df7jTao6mtXFcYtZzCsJ"
+           bip32-xpub-child-public-key))
+    (is (= "c2f6d81" (format "%x" child-node-fingerprint)))
+    ;; Chain: m/44H/0H
+    (is (= "xprv9vsUaQydQJbS21eDwfKv3WYoU9cr1JcFxt252mQneUB4ABBQScW5sx7ZjJ5HMGDGy1coR5Cvit6YWio3Nj4fSiBAfJFJMMWHNdBB3FEowpt"
+           bip32-xprv-grandchild-private-key))
+    (is (= "xpub69rpyvWXEg9jEVih3grvQeVY2BTLQmL7L6wfq9pQCoi32yWYz9pLRkS3aZhG1fvxPKjwWPUqoLFvTdGAjuUeNdYWRWFu9BdivDFrWHjwiVZ"
+           bip32-xpub-grandchild-public-key))
+    (is (= "8809de7d" (format "%x" grandchild-node-fingerprint)))
+    ;; Chain: m/44H/0H/0H
+    (is (= "xprv9yfQqFhGvzYGeZvyLrdwHSreqxRQEXPjJzstFgGNwV6wT1ueWfU9Dyt4yBCZo45Zt5fEMTh3wEp8nyUnjsDMYHVNN9bmtcQZt6ouQxGCcGJ"
+           bip32-xprv-grand-grandchild-private-key))
+    (is (= "xpub6CemEmEAmN6Zs41SStAweaoPPzFtdz7agDoV44fzVpdvKpEo4CnPmnCYpTLNuT55NfJG6DDGWhcK7XA6xP1XrqfRtscmhcFSkbHNLRW6Wxt"
+           bip32-xpub-grand-grandchild-public-key))))
+
 (comment
   (clojure.test/run-all-tests))
