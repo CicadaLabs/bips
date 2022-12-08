@@ -21,3 +21,10 @@
            (sut/derivation-path "BTC" 1 :change 0)))
   (t/is (= "m/44'/0'/1'/1/1"
            (sut/derivation-path "BTC" 1 :change 1))))
+
+(t/deftest exeptional-case
+  (t/is (thrown-with-msg? Exception #"Coin type .* not found in coin_types.edn file."
+          (sut/derivation-path "WTV" 1 :change 1))))
+
+(comment
+  (clojure.test/run-all-tests))
