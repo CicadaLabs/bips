@@ -4,8 +4,7 @@
   org.apache.commons/commons-lang3 {:mvn/version "3.12.0"},
   org.bouncycastle/bcprov-jdk15on {:mvn/version "1.69"},
   org.clj-commons/digest {:mvn/version "1.4.100"},
-  org.clojure/math.numeric-tower {:mvn/version "0.0.5"}
-  org.clojure/data.json {:mvn/version "2.4.0"}},
+  org.clojure/math.numeric-tower {:mvn/version "0.0.5"}},
 
  :paths ["src/" "resources/"],
 
@@ -19,10 +18,11 @@
               :deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
               :ns-default build}
 
-  :release
-  {:extra-deps {applied-science/deps-library    {:mvn/version "0.4.0"}
-                org.clojars.michihuber/data.xml {:mvn/version "2.0.0-alpha-custom"}}
-   :main-opts  ["-m" "applied-science.deps-library"]}
+  :release {:extra-deps {applied-science/deps-library    {:mvn/version "0.4.0"}
+                         org.clojars.michihuber/data.xml {:mvn/version "2.0.0-alpha-custom"}}
+            :main-opts  ["-m" "applied-science.deps-library"]}
+
+  :env/dev {:extra-deps {org.clojure/data.json {:mvn/version "2.4.0"}}}
 
   ;; cljstyle checker
   :run/cljstyle
