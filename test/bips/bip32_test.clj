@@ -33,7 +33,27 @@
   [name ns test-fn & [metadata]]
   (intern ns (with-meta (symbol name) (merge metadata {:test #(test-fn)})) (fn [])))
 
-(defmacro gen-test-vector [tv]
+(defmacro gen-test-func
+  "Generates a function based on a test vector `tv`. The test vector is a map
+  that describes a seed and it's derived keys. E.g.:
+
+  {:seed \"000102030405060708090a0b0c0d0e0f\"
+  :derived-keys
+  [{:path \"m\"
+    :identifier \"3442193e1bb70916e914552172cd4e2dbc9df811\"
+    :fingerprint \"3442193e\"
+    :address \"15mKKb2eos1hWa6tisdPwwDC1a5J1y9nma\"
+    :private-key \"e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35\"
+    :wif \"L52XzL2cMkHxqxBXRyEpnPQZGUs3uKiL3R11XbAdHigRzDozKZeW\"
+    :public-key \"0339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2\"
+    :chain-code \"873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d508\"
+    :serialized-pubkey \"0488b21e000000000000000000873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d5080339a36013301597daef41fbe593a02cc513d0b55527ec2df1050e2e8ff49c85c2\"
+    :serialized-prvkey \"0488ade4000000000000000000873dff81c02f525623fd1fe5167eac3a55a049de3d314bb42ee227ffed37d50800e8f32e723decf4051aefac8e2c93c9c5b214313817cdb01a1494b917c8436b35\"
+    :bip32-xpubkey \"xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhePY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8\"
+    :bip32-xprvkey \"xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi\"
+    :parent-fingerprint \"00000000\"
+    :index 0}]}"
+  [tv]
   `(fn []
      (let [seed# (:seed ~tv)]
        (doseq [i# (range (count (:derived-keys ~tv)))]
@@ -94,7 +114,7 @@
 (doseq [i (range (count test-vectors))]
   (add-test (symbol (format "test-vector-%d-generated" i))
             (symbol (str *ns*))
-            (gen-test-vector (nth test-vectors i))))
+            (gen-test-func (nth test-vectors i))))
 
 ;; The CKD functions sometimes return 31 byte keys, the buffer has to be padded to 32 bytes
 (deftest test-vector-3
