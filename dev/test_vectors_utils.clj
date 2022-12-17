@@ -36,5 +36,5 @@
                                                   :bip32-xprv (get tv "bip32_xprv")}))
 
 (comment
-  (spit "test/bips/fixtures/vectors.edn" (prn-str @test-vectors))
-  (first (get (edn/read-string (slurp "test/bips/fixtures/vectors.edn")) :english)))
+  (spit "test/bips/fixtures/bip39-vectors.edn" (prn-str @test-vectors))
+  (first (get (edn/read-string (slurp "test/bips/fixtures/bip39-vectors.edn")) :english)))
