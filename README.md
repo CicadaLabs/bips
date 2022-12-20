@@ -203,3 +203,46 @@ Reference
 ---------
 
 - https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
+
+BIP44
+=====
+
+This proposal defines a logical hierarchy for deterministic wallets
+based on an algorithm described in BIP-0032.
+
+Example
+-------
+
+The example below generates a BIP 44 derivation path for a specific
+key within an HD wallet.
+
+The first argument, "BTC", specifies the coin type. In this case,
+"BTC" stands for Bitcoin. The second argument, 0, specifies the
+account index. The third argument, :external, specifies the type of
+derivation. :external specifies that the derivation path should be for
+the external chain, which is used for receiving payments. The final
+argument, 0, specifies the address index within the external chain.
+
+The resulting output of the function is the string "m/44'/0'/0'/0/0",
+which is a BIP 44 derivation path. The m at the beginning of the
+string stands for "master", and the subsequent numbers and single
+quotes (') represent child derivation steps. The 44' specifies that
+the key being derived is a hardened key at the 44th index of the BIP
+44 purpose field. The subsequent numbers 0'/0'/0/0 specify the account
+index, external chain index, and address index, respectively. The
+single quotes indicate that the keys at these indices are hardened
+keys.
+
+In this specific example, the derivation path would represent the
+first external address (address index 0) in the first account (account
+index 0) of the Bitcoin coin type (coin type "BTC").
+
+```clojure
+(derivation-path "BTC" 0 :external 0)
+;; => "m/44'/0'/0'/0/0"
+```
+
+Reference
+---------
+
+- https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki
