@@ -1,3 +1,22 @@
+;; Copyright © 2022 CicadaBank
+
+;; Permission is hereby granted, free of charge, to any person obtaining a copy of
+;; this software and associated documentation files (the "Software"), to deal in
+;; the Software without restriction, including without limitation the rights to
+;; use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+;; the Software, and to permit persons to whom the Software is furnished to do so,
+;; subject to the following conditions:
+
+;; The above copyright notice and this permission notice shall be included in all
+;; copies or substantial portions of the Software.
+
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+;; FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+;; COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+;; IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 (ns bips.bip32-utils
   (:require
     [alphabase.base58 :as b58]
@@ -46,27 +65,30 @@
     (.doFinal digest output 0)
     output))
 
+(defn pad-leading-zeros [n k]
+  (str (apply str (take (- n (count k)) (repeat "0"))) k))
+
+(defn ->32-bytes
+  "Pad 0s into a private key to have 32 bytes."
+  [k]
+  (pad-leading-zeros 64 k))
+
+(defn ->33-bytes
+  "Pad 0s into a private key to have 33 bytes."
+  [k]
+  (pad-leading-zeros 66 k))
+
 (defn compress-public-key
   "Compress a public key `K`.
   Start with `02` if the Y part of the public key is even and `03` otherwise."
   [K]
-  (str (if (= 0 (mod (nth (codecs/hex->bytes K) 63) 2))
+  (str (if (= 0 (mod (nth (codecs/hex->bytes (pad-leading-zeros 128 K)) 63) 2))
          "02"
          "03")
        (apply str (take 64 K))))
 
-(defn private-key->32-bytes
-  "Pad 0s into a private key to have 32 bytes."
-  [k]
-  (str (apply str (take (- 64 (count k)) (repeat "0"))) k))
-
-(defn private-key->33-bytes
-  "Pad 0s into a private key to have 33 bytes."
-  [k]
-  (str (apply str (take (- 66 (count k)) (repeat "0"))) k))
-
 (defn decompressKey
-  "Decompress a compressed public key (x co-ord and low-bit of y-coord)..
+  "Decompress a compressed public key (x co-ord and low-bit of y-coord).
   `xBN`: public key in BigInteger format.
   `yBit`: parity bit `0x02` if the Y is even and `0x03` otherwise.
   Reference: `https://github.com/web3j/web3j/blob/master/crypto/src/main/java/org/web3j/crypto/Sign.java#L208`"
@@ -89,7 +111,7 @@
        chain-code
        (if (= :public type)
          key-data
-         (private-key->33-bytes key-data))))
+         (->33-bytes key-data))))
 
 (defn serialize-base58
   "Serialize a key into base58."
@@ -283,7 +305,7 @@
 (defn legacy-address
   "Encode a public key into a legacy Bitcoin address.
   `K` is the public key.
-  `network` is either `:mainet` or `:testnet`."
+  `network` is either `:mainnet` or `:testnet`."
   [K network]
   (encode-base58 (byte-array (codecs/hex->bytes
                                (str (case network

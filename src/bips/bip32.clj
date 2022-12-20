@@ -1,3 +1,22 @@
+;; Copyright © 2022 CicadaBank
+
+;; Permission is hereby granted, free of charge, to any person obtaining a copy of
+;; this software and associated documentation files (the "Software"), to deal in
+;; the Software without restriction, including without limitation the rights to
+;; use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+;; the Software, and to permit persons to whom the Software is furnished to do so,
+;; subject to the following conditions:
+
+;; The above copyright notice and this permission notice shall be included in all
+;; copies or substantial portions of the Software.
+
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+;; FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+;; COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+;; IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 (ns bips.bip32
   (:require
     [bips.bip32-utils :refer [add-point
@@ -6,8 +25,7 @@
                               CURVE_PARAMS
                               decompressKey
                               hardened hardened?
-                              private-key->32-bytes
-                              private-key->33-bytes
+                              ->32-bytes ->33-bytes
                               private->public-key]]
     [buddy.core.codecs :as codecs]
     [buddy.core.mac :as mac]
@@ -28,7 +46,7 @@
               (>= (.compareTo (BigInteger. private-key 16)
                               (.getN CURVE_PARAMS)) 0))
       (throw (Exception. "the master key is invalid.")))
-    {:private-key (private-key->32-bytes private-key)
+    {:private-key (->32-bytes private-key)
      :public-key (compress-public-key (.toString (private->public-key
                                                    (BigInteger. private-key 16)) 16))
      :chain-code (apply str (take-last 64 master-code))
@@ -46,7 +64,7 @@
                                           16))
                            16))
         I (if (>= index (hardened 0))
-            (mac/hash (codecs/hex->bytes (str (private-key->33-bytes k-par)
+            (mac/hash (codecs/hex->bytes (str (->33-bytes k-par)
                                               (format "%08x" index)))
                       {:key (codecs/hex->bytes c-par)
                        :alg :hmac+sha512})
@@ -60,7 +78,7 @@
     (when (or (>= (.compareTo (BigInteger. 1 IL) (.getN CURVE_PARAMS)) 0)
               (= 0 (.compareTo BigInteger/ZERO ki)))
       (throw (Exception. "key is invalid, proceed with the next value for i.")))
-    {:private-key (private-key->32-bytes (.toString ki 16))
+    {:private-key (->32-bytes (.toString ki 16))
      :chain-code (codecs/bytes->hex IR)
      :index index
      :depth (+ depth 1)}))
@@ -132,4 +150,3 @@
         (if (= :public key-type)
           `(N ~current-node)
           current-node)))))
-

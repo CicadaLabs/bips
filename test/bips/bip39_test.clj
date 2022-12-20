@@ -1,3 +1,22 @@
+;; Copyright © 2022 CicadaBank
+
+;; Permission is hereby granted, free of charge, to any person obtaining a copy of
+;; this software and associated documentation files (the "Software"), to deal in
+;; the Software without restriction, including without limitation the rights to
+;; use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+;; the Software, and to permit persons to whom the Software is furnished to do so,
+;; subject to the following conditions:
+
+;; The above copyright notice and this permission notice shall be included in all
+;; copies or substantial portions of the Software.
+
+;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+;; FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+;; COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+;; IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 (ns bips.bip39-test
   (:require
     [bips.bip39 :refer [check-mnemonic
@@ -33,13 +52,13 @@
          (entropy->mnemonic [0x33, 0xE4, 0x6B, 0xB1, 0x3A, 0x74, 0x6E, 0xA4, 0x1C, 0xDD, 0xE4, 0x5C, 0x90, 0x84, 0x6A, 0x79,]))))
 
 (def test-vectors-en
-  (-> "./test/bips/fixtures/vectors.edn"
+  (-> "./test/bips/fixtures/bip39-vectors.edn"
       slurp
       edn/read-string
       :english))
 
 (def test-vectors-jp
-  (-> "./test/bips/fixtures/vectors.edn"
+  (-> "./test/bips/fixtures/bip39-vectors.edn"
       slurp
       edn/read-string
       :japanese))
@@ -51,8 +70,8 @@
   [name ns test-fn & [metadata]]
   (intern ns (with-meta (symbol name) (merge metadata {:test #(test-fn)})) (fn [])))
 
-(defmacro gen-test-vector [n tv]
-  `(deftest n
+(defmacro gen-test-vector [tv]
+  `(fn []
      (let [entropy# (:entropy ~tv)
            mnemonic# (:mnemonic ~tv)
            seed# (:seed ~tv)
@@ -64,8 +83,8 @@
               (mnemonic->seed mnemonic# passphrase#)))
        (is (check-mnemonic mnemonic#)))))
 
-(defmacro gen-test-vector-jp [n tv]
-  `(deftest n
+(defmacro gen-test-vector-jp [tv]
+  `(fn []
      (let [entropy# (:entropy ~tv)
            mnemonic# (java.text.Normalizer/normalize (:mnemonic ~tv)
                                                      java.text.Normalizer$Form/NFKD)
@@ -82,13 +101,13 @@
   (let [tv (nth test-vectors-en i)]
     (add-test (symbol (str "test-vector-" i))
               (symbol (str *ns*))
-              (gen-test-vector (symbol (str "test-vector-" i)) tv))))
+              (gen-test-vector tv))))
 
 (doseq [i (range 0 (count test-vectors-jp))]
   (let [tv (nth test-vectors-jp i)]
     (add-test (symbol (str "test-vector-jp-" i))
               (symbol (str *ns*))
-              (gen-test-vector-jp (symbol (str "test-vector-jp-" i)) tv))))
+              (gen-test-vector-jp tv))))
 
 (comment
   (clojure.test/run-all-tests))
