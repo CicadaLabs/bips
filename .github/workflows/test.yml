@@ -1,5 +1,5 @@
 # from https://github.com/Flexiana/framework/blob/main/.github/workflows/test.yml
-name: Clojure CI
+name: Test Source CI
 
 on:
   push:
