@@ -85,7 +85,7 @@
   (str (if (= 0 (mod (nth (codecs/hex->bytes (pad-leading-zeros 128 K)) 63) 2))
          "02"
          "03")
-       (apply str (take 64 K))))
+       (apply str (take 64 (pad-leading-zeros 128 K)))))
 
 (defn decompressKey
   "Decompress a compressed public key (x co-ord and low-bit of y-coord).
