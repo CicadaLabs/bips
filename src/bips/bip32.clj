@@ -119,7 +119,7 @@
   {:public-key (compress-public-key
                  (.toString
                    (private->public-key
-                     (BigInteger. (apply str k-par) 16)) 16))
+                     (BigInteger. k-par 16)) 16))
    :chain-code c-par
    :index index
    :depth depth})
