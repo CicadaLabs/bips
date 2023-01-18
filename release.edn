@@ -1,4 +1,4 @@
 {:group-id "com.cicadabank"
  :artifact-id "bips"
- :version "0.1.1"
+ :version "0.1.2"
  :scm-url "https://github.com/CicadaBank/bips"}
