@@ -138,20 +138,20 @@
         parts (gensym 'parts)
         current-node (gensym 'current-node)
         index (gensym 'index)]
-       `(let [~path-parts (str/split ~chain-path #"/")]
-          (loop [~current-node (if (= "m" (first ~path-parts))
-                                 (derive-master-node ~seed)
-                                 (throw (Exception.
-                                         (str "Invalid path: " (first ~path-parts)))))
-                 ~parts (rest ~path-parts)]
-            (if (seq ~parts)
-              (let [~part (first ~parts)
-                    ~index (if (hardened? ~part)
-                             (hardened (Integer/parseInt (subs ~part 0 (- (count ~part) 1))))
-                             (Integer/parseInt ~part))]
-                (recur
-                 (CKDpriv ~current-node ~index)
-                 (rest ~parts)))
-              (if (= :public ~key-type)
-                (N ~current-node)
-                ~current-node))))))
+    `(let [~path-parts (str/split ~chain-path #"/")]
+       (loop [~current-node (if (= "m" (first ~path-parts))
+                              (derive-master-node ~seed)
+                              (throw (Exception.
+                                       (str "Invalid path: " (first ~path-parts)))))
+              ~parts (rest ~path-parts)]
+         (if (seq ~parts)
+           (let [~part (first ~parts)
+                 ~index (if (hardened? ~part)
+                          (hardened (Integer/parseInt (subs ~part 0 (- (count ~part) 1))))
+                          (Integer/parseInt ~part))]
+             (recur
+               (CKDpriv ~current-node ~index)
+               (rest ~parts)))
+           (if (= :public ~key-type)
+             (N ~current-node)
+             ~current-node))))))
