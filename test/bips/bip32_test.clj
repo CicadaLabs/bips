@@ -78,8 +78,8 @@
        (doseq [i# (range (count (:derived-keys ~tv)))]
          (let [derived-key# (nth (:derived-keys ~tv) i#)
                path# (:path derived-key#)
-               extended-private-key# (eval `(derive-path ~seed# ~path# :private))
-               extended-public-key# (eval `(derive-path ~seed# ~path# :public))
+               extended-private-key# (derive-path seed# path# :private)
+               extended-public-key# (derive-path seed# path# :public)
                bip32-xprvkey# (:bip32-xprvkey derived-key#)
                bip32-xpubkey# (:bip32-xpubkey derived-key#)
                identifier# (:identifier derived-key#)
@@ -651,6 +651,14 @@
            bip32-xprv-grand-grandchild-private-key))
     (is (= "xpub6CTydV5ab9iSEgfY4hQqofu9YJiijeUs89T6jADgvA32Mk4oTvaV4pUJahHAGizYy2s3HyBRX1uiN2d94RsMawEgTMmRuDHLUR71EayS34i"
            bip32-xpub-grand-grandchild-public-key))))
+
+(deftest threading-macro-works-with-derive-path
+  (is (= (let [key "000102030405060708090a0b0c0d0e0f"
+               path "m/0H/1/2H/2/1000000000"
+               key-type :private]
+           (-> key
+               (derive-path path key-type)))
+         (derive-path "000102030405060708090a0b0c0d0e0f" "m/0H/1/2H/2/1000000000" :private))))
 
 (comment
   (clojure.test/run-all-tests))
