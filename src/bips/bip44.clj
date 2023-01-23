@@ -41,4 +41,5 @@
 
 (comment
   (derivation-path "BTC" 0 :external 0)
-  (derivation-path "XMR" 0 :change 0))
+  (derivation-path "XMR" 0 :change 0)
+  (derivation-path "BTC" 0))
