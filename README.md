@@ -242,6 +242,14 @@ index 0) of the Bitcoin coin type (coin type "BTC").
 ;; => "m/44'/0'/0'/0/0"
 ```
 
+A second version of `derivation-path` takes only 2 arguments a
+`coin-type` and an `account` index to derive an account address.
+
+```clojure
+(derivation-path "BTC" 0)
+;; => "m/44'/0'/0'"
+```
+
 Reference
 ---------
 
