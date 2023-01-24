@@ -78,8 +78,8 @@
        (doseq [i# (range (count (:derived-keys ~tv)))]
          (let [derived-key# (nth (:derived-keys ~tv) i#)
                path# (:path derived-key#)
-               extended-private-key# (eval `(derive-path ~seed# ~path# :private))
-               extended-public-key# (eval `(derive-path ~seed# ~path# :public))
+               extended-private-key# (derive-path seed# path# :private)
+               extended-public-key# (derive-path seed# path# :public)
                bip32-xprvkey# (:bip32-xprvkey derived-key#)
                bip32-xpubkey# (:bip32-xpubkey derived-key#)
                identifier# (:identifier derived-key#)
@@ -643,14 +643,22 @@
     ;; Chain: m/44H/0H
     (is (= "xprv9vsUaQydQJbS21eDwfKv3WYoU9cr1JcFxt252mQneUB4ABBQScW5sx7ZjJ5HMGDGy1coR5Cvit6YWio3Nj4fSiBAfJFJMMWHNdBB3FEowpt"
            bip32-xprv-grandchild-private-key))
-    (is (= "xpub69rpyvWXEg9jEVih3grvQeVY2BTLQmL7L6wfq9pQCoi32yWYz9pLRkS3aZhG1fvxPKjwWPUqoLFvTdGAjuUeNdYWRWFu9BdivDFrWHjwiVZ"
+    (is (= "xpub69rpyvWXEg9jEVih3grvQeVY2BTLQmL7L6wfq9pQCoi32yWYz9pLRkS3aYXrkHLgUia7Fx9XkNJmYtdJM2HYPvXftMeL6KKaRCaemYiBBfZ"
            bip32-xpub-grandchild-public-key))
-    (is (= "8809de7d" (format "%x" grandchild-node-fingerprint)))
+    (is (= "6ebca719" (format "%x" grandchild-node-fingerprint)))
     ;; Chain: m/44H/0H/0H
-    (is (= "xprv9yfQqFhGvzYGeZvyLrdwHSreqxRQEXPjJzstFgGNwV6wT1ueWfU9Dyt4yBCZo45Zt5fEMTh3wEp8nyUnjsDMYHVNN9bmtcQZt6ouQxGCcGJ"
+    (is (= "xprv9yUdDyYgknA92Cb4xfsqSXxQzGtELBm1kvXVvmp5MpW3UwjevPGEX29pjR9MAL13UTE1ZDfCwZ7Y3Uwpqv5BGP4cvdkS6DSTbvdYK7RicHk"
            bip32-xprv-grand-grandchild-private-key))
-    (is (= "xpub6CemEmEAmN6Zs41SStAweaoPPzFtdz7agDoV44fzVpdvKpEo4CnPmnCYpTLNuT55NfJG6DDGWhcK7XA6xP1XrqfRtscmhcFSkbHNLRW6Wxt"
+    (is (= "xpub6CTydV5ab9iSEgfY4hQqofu9YJiijeUs89T6jADgvA32Mk4oTvaV4pUJahHAGizYy2s3HyBRX1uiN2d94RsMawEgTMmRuDHLUR71EayS34i"
            bip32-xpub-grand-grandchild-public-key))))
+
+(deftest threading-macro-works-with-derive-path
+  (is (= (let [key "000102030405060708090a0b0c0d0e0f"
+               path "m/0H/1/2H/2/1000000000"
+               key-type :private]
+           (-> key
+               (derive-path path key-type)))
+         (derive-path "000102030405060708090a0b0c0d0e0f" "m/0H/1/2H/2/1000000000" :private))))
 
 (comment
   (clojure.test/run-all-tests))
