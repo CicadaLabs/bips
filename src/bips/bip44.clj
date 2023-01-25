@@ -24,22 +24,30 @@
 (defn derivation-path
   "The derivation-path multi-arity function. The first version takes
   four arguments: a `coin-type`, an `account` index, a `chain` type,
-  and an `address` index.  It uses these values to construct a string
-  representing a path to a specific wallet address.  Throws an
-  exception with an error message if the `coin-type` in not found in
-  `coin_types.edn`.  A second version taking two arguments is used to
-  derive an account address from a `coin-type` and an `account`
-  index."
-  ([coin-type account chain address]
-   (str (derivation-path coin-type account) "/" (get const/chain-map chain) "/" address))
-  ([coin-type account]
+  an `address` index and a configuration map for setting the
+  `hardened-indicator` symbol (e.g ``{:hardened-indicator \"'\"}``).
+  It uses these values to construct a string representing a path to a
+  specific wallet address.  Throws an exception with an error message
+  if the `coin-type` in not found in `coin_types.edn`.  A second
+  version taking two arguments is used to derive an account address
+  from a `coin-type`, an `account` index and a configuration map for
+  setting the `hardened-indicator` symbol (e.g ``{:hardened-indicator
+  \"'\"}``)."
+  ([coin-type account chain address {:keys [hardened-indicator]
+                                     :or {hardened-indicator "H"}}]
+   (str (derivation-path coin-type account {:hardened-indicator hardened-indicator})
+        "/" (get const/chain-map chain) "/" address))
+  ([coin-type account {:keys [hardened-indicator]
+                       :or {hardened-indicator "H"}}]
    (if-let [matching-coin-type (first (filter #(= (:symbol %) coin-type)
                                               const/coin-types))]
-     (str "m/44'/" (:coin-type matching-coin-type)
-          "'/" account "'")
+     (str "m/44" hardened-indicator "/" (:coin-type matching-coin-type)
+          hardened-indicator "/" account hardened-indicator)
      (throw (Exception. (str "Coin type " coin-type " not found in coin_types.edn file."))))))
 
 (comment
-  (derivation-path "BTC" 0 :external 0)
-  (derivation-path "XMR" 0 :change 0)
-  (derivation-path "BTC" 0))
+  (derivation-path "BTC" 0 :external 0 {})
+  (derivation-path "BTC" 0 :external 0 {:hardened-indicator "'"})
+  (derivation-path "XMR" 0 :change 0 {})
+  (derivation-path "BTC" 0 {})
+  (derivation-path "BTC" 0 {:hardened-indicator "'"}))
