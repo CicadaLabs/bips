@@ -30,7 +30,8 @@
         private-view-key (sut/->private-view-key private-spend-key)
         primary-address (sut/get-primary-public-address
                           (sut/->public-key private-spend-key)
-                          (sut/->public-key private-view-key))]
+                          (sut/->public-key private-view-key)
+                          :mainnet)]
     (t/is (= "4d93d393f0f2c4a9837524f9d740fa85af54c464864aa8c16d39ef3409781802"
              private-spend-key))
     (t/is (= "c2e6e8597bb5050e57a98d284faf27edc3587d57cccd8a2b3edfd38cdd23af0b"
@@ -46,7 +47,7 @@
         public-spend-key (sut/->public-key private-spend-key)
         public-view-key (sut/->public-key private-view-key)
         primary-address (sut/get-primary-public-address
-                          public-spend-key public-view-key)]
+                          public-spend-key public-view-key :mainnet)]
     (t/is (= "0ccdf1e0217221deb8d807c1ecdf9c0c00beffbc339cdfa5c203c1a022d9cf01"
              private-spend-key))
     (t/is (= "f303de33534d6a9e46497cf177e12b7bdfaf1405b2a03b5a7074a74b0946a805"

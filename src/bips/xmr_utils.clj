@@ -28,6 +28,10 @@
   (:import
     org.bouncycastle.jcajce.provider.digest.Keccak$Digest256))
 
+(def network-bytes
+  {:mainnet "12"
+   :testnet "35"})
+
 (defn bytes->int
   "Converts a byte array into a big integer.
   It has an optional parameter `little-endian`, which defaults to true.
@@ -173,10 +177,13 @@
     x))
 
 (defn get-primary-public-address
-  "Create the actual Public Address from `public-spend-key` and `public-view-key`"
+  "Create the actual Public Address from `public-spend-key`,
+  `public-view-key` and `network-type` (`:mainnet` or `:testnet`)."
   [public-spend-key
-   public-view-key]
-  (let [raw-public-address (str "12" public-spend-key public-view-key)
+   public-view-key
+   network-type]
+  (let [raw-public-address (str (get network-bytes network-type)
+                                public-spend-key public-view-key)
         raw-public-address-hash (keccak-256 raw-public-address)
         public-address (str raw-public-address
                             (apply str (take 8 raw-public-address-hash)))]
