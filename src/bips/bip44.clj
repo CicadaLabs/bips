@@ -30,24 +30,25 @@
   specific wallet address.  Throws an exception with an error message
   if the `coin-type` in not found in `coin_types.edn`.  A second
   version taking two arguments is used to derive an account address
-  from a `coin-type`, an `account` index and a configuration map for
-  setting the `hardened-indicator` symbol (e.g ``{:hardened-indicator
-  \"'\"}``)."
-  ([coin-type account chain address {:keys [hardened-indicator]
-                                     :or {hardened-indicator "H"}}]
-   (str (derivation-path coin-type account {:hardened-indicator hardened-indicator})
+  from a `coin-type`, an `account` index and an optional
+  `hardened-indicator` symbol."
+  ([coin-type account chain address hardened-indicator]
+   (str (derivation-path coin-type account hardened-indicator)
         "/" (get const/chain-map chain) "/" address))
-  ([coin-type account {:keys [hardened-indicator]
-                       :or {hardened-indicator "H"}}]
+  ([coin-type account chain address]
+   (derivation-path coin-type account chain address "'"))
+  ([coin-type account hardened-indicator]
    (if-let [matching-coin-type (first (filter #(= (:symbol %) coin-type)
                                               const/coin-types))]
      (str "m/44" hardened-indicator "/" (:coin-type matching-coin-type)
           hardened-indicator "/" account hardened-indicator)
-     (throw (Exception. (str "Coin type " coin-type " not found in coin_types.edn file."))))))
+     (throw (Exception. (str "Coin type " coin-type " not found in coin_types.edn file.")))))
+  ([coin-type account]
+   (derivation-path coin-type account "'")))
 
 (comment
-  (derivation-path "BTC" 0 :external 0 {})
-  (derivation-path "BTC" 0 :external 0 {:hardened-indicator "'"})
-  (derivation-path "XMR" 0 :change 0 {})
-  (derivation-path "BTC" 0 {})
-  (derivation-path "BTC" 0 {:hardened-indicator "'"}))
+  (derivation-path "BTC" 0 :external 0 "H")
+  (derivation-path "BTC" 0 :external 0)
+  (derivation-path "XMR" 0 :change 0 "H")
+  (derivation-path "BTC" 0 "H")
+  (derivation-path "BTC" 0))
