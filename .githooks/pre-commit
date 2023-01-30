@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if ! command -v cljstyle &> /dev/null
+then
+    echo "cljstyle could not be found, try to install it following https://github.com/greglook/cljstyle#installation"
+    exit 1
+else
+    set -e
+    cljstyle check --report $(cat <(git diff --name-only) <(git diff --name-only --staged) | sort | uniq)
+fi
