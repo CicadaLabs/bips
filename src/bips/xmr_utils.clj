@@ -21,7 +21,6 @@
   (:require
     [alphabase.base58 :as b58]
     [bips.bip32 :as bip32]
-    [bips.bip32-utils :as bip32-utils]
     [bips.bip39 :as bip39]
     [buddy.core.codecs :as codecs]
     [clojure.math.numeric-tower :as math])
