@@ -23,9 +23,7 @@
     [bips.bip32 :as bip32]
     [bips.bip39 :as bip39]
     [buddy.core.codecs :as codecs]
-    [clj-commons.digest :as digest])
-  (:import
-    org.apache.commons.codec.binary.Hex))
+    [clj-commons.digest :as digest]))
 
 (defn derive-from-mnemonic
   "Derive from a BIP039 mnemonic seed to a spend key for Monero."

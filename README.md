@@ -252,6 +252,14 @@ A second version of `derivation-path` takes only 2 arguments a
 ;; => "m/44'/0'/0'"
 ```
 
+An optional parameter `hardened-indicator` can be provided to specify
+the character for hardened indices.
+
+```clojure
+(derivation-path "BTC" 0 :external 0 "H")
+;; => "m/44H/0H/0H/0/0"
+```
+
 Reference
 ---------
 
