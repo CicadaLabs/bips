@@ -206,13 +206,14 @@
 
 (defn derive-from-mnemonic
   "Derive from a BIP039 mnemonic seed to a spend key for Monero."
-  ([mnemonic path key-type]
-   (-> (bip39/mnemonic->seed mnemonic)
+  ([mnemonic path key-type & [password]]
+   (-> mnemonic
+       (bip39/mnemonic->seed password)
        (bip32/derive-path path key-type)
        (:private-key)
        (sc-reduce32)))
 
-  ([{:keys [mnemonic path key-type]}]
+  ([{:keys [mnemonic path key-type password]}]
    (derive-from-mnemonic mnemonic path key-type)))
 
 (defn ->private-view-key

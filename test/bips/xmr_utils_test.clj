@@ -27,6 +27,7 @@
 (t/deftest test-vector-1
   (let [mnemonic-seed "acid employ suggest menu desert pioneer hard salmon consider stuff margin over bus fiction direct useful tornado output forward wing cute chicken ladder hockey"
         private-spend-key (sut/derive-from-mnemonic mnemonic-seed "m/44H/128H/0H" :private)
+        private-sk-pass (sut/derive-from-mnemonic mnemonic-seed "m/44H/128H/0H" :private "2")
         private-view-key (sut/->private-view-key private-spend-key)
         primary-address (sut/get-primary-public-address
                           (sut/->public-key private-spend-key)
@@ -34,6 +35,8 @@
                           :mainnet)]
     (t/is (= "4d93d393f0f2c4a9837524f9d740fa85af54c464864aa8c16d39ef3409781802"
              private-spend-key))
+    (t/is (= "ebb14c833f860f401c3b8f41f13936aa1156f2920cb95a6cf9e22665767f080b"
+             private-sk-pass))
     (t/is (= "c2e6e8597bb5050e57a98d284faf27edc3587d57cccd8a2b3edfd38cdd23af0b"
              private-view-key))
     (t/is (= "4295Lfg8n2pJiN5eC6YHMGGR4oZ1PuaGJNyNo24wNjrdNPLBSVFFHVEay83fFwJBCWPVumE8xW6wKB6Udj8ttmZoNLDTgsn"
