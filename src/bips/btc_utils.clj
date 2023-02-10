@@ -29,13 +29,13 @@
 
 (defn derive-from-mnemonic
   "Derive from a BIP039 mnemonic seed to a spend key for Monero."
-  ([mnemonic path key-type]
-   (-> (bip39/mnemonic->seed mnemonic)
+  ([mnemonic path key-type & [password]]
+   (-> (bip39/mnemonic->seed mnemonic password)
        (bip32/derive-path path key-type)
        (:private-key)))
 
-  ([{:keys [mnemonic path key-type]}]
-   (derive-from-mnemonic mnemonic path key-type)))
+  ([{:keys [mnemonic path key-type password]}]
+   (derive-from-mnemonic mnemonic path key-type password)))
 
 (defn privatekey->wif
   "Convert an hexadecimal encoded private key to WIF"
