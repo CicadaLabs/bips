@@ -20,10 +20,20 @@
 (ns bips.btc-utils
   (:require
     [alphabase.base58 :as base58]
+    [bips.bip32 :as bip32]
+    [bips.bip39 :as bip39]
     [buddy.core.codecs :as codecs]
-    [clj-commons.digest :as digest])
-  (:import
-    org.apache.commons.codec.binary.Hex))
+    [clj-commons.digest :as digest]))
+
+(defn derive-from-mnemonic
+  "Derive from a BIP039 mnemonic seed to a spend key for Monero."
+  ([mnemonic path key-type]
+   (-> (bip39/mnemonic->seed mnemonic)
+       (bip32/derive-path path key-type)
+       (:private-key)))
+
+  ([{:keys [mnemonic path key-type]}]
+   (derive-from-mnemonic mnemonic path key-type)))
 
 (defn privatekey->wif
   "Convert an hexadecimal encoded private key to WIF"

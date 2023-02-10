@@ -75,7 +75,7 @@ benefits follow:
   transactions without first getting a receiving address in advance.
 
 ![](./images/key-derivation.png)
-  
+
 Examples
 --------
 
@@ -166,23 +166,6 @@ representing the child index. An index may be followed by the letter
 "H" to indicate that it is a hardened child index (i.e., it is greater
 than or equal to 2^31).
 
-Find below the macro-expanded version of the code snippet for
-reference:
-
-```clojure
-(CKDpriv
-  (CKDpriv
-    (CKDpriv
-      (CKDpriv
-        (CKDpriv
-          (derive-master-node "000102030405060708090a0b0c0d0e0f")
-          2147483648)
-        1)
-      2147483650)
-    2)
-  1000000000)
-```
-
 The keyword `:private` indicates that the private key of the child
 node should be included in the returned map. If the keyword `:public`
 is used instead, the private key will be omitted from the returned
@@ -197,6 +180,25 @@ map.
 ;;     "c783e67b921d2beb8f6b389cc646d7263b4145701dadd2161548a8b078e65e9e",
 ;;     :index 1000000000,
 ;;     :depth 5}
+```
+
+The code below is the macro-expanded version of the code snippet from
+version v0.1.1. It no longer expands to this form, but it will be kept
+here for better visualization since it's pretty much what happens with
+`derive-path` function:
+
+```clojure
+(CKDpriv
+  (CKDpriv
+    (CKDpriv
+      (CKDpriv
+        (CKDpriv
+          (derive-master-node "000102030405060708090a0b0c0d0e0f")
+          2147483648)
+        1)
+      2147483650)
+    2)
+  1000000000)
 ```
 
 Reference
@@ -248,6 +250,14 @@ A second version of `derivation-path` takes only 2 arguments a
 ```clojure
 (derivation-path "BTC" 0)
 ;; => "m/44'/0'/0'"
+```
+
+An optional parameter `hardened-indicator` can be provided to specify
+the character for hardened indices.
+
+```clojure
+(derivation-path "BTC" 0 :external 0 "H")
+;; => "m/44H/0H/0H/0/0"
 ```
 
 Reference

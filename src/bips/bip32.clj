@@ -23,7 +23,6 @@
                               compress-public-key
                               group-add
                               CURVE_PARAMS
-                              decompressKey
                               hardened hardened?
                               ->32-bytes ->33-bytes
                               private->public-key]]

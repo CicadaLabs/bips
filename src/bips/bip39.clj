@@ -19,7 +19,14 @@
 
 (ns bips.bip39
   (:require
-    [bips.utils :refer :all]
+    [bips.utils :refer [binary+checksun->seed-phrase-binary
+                        binary-with-digest->seed-phrase
+                        byte-array->digest
+                        checksum
+                        detect-language
+                        entropy->binary
+                        seed-phrase->binary-array
+                        size->suffix-length]]
     [buddy.core.codecs :as codecs]
     [clojure.string :as str])
   (:import
