@@ -86,7 +86,7 @@
   ([mnemonic passphrase]
    (let [mnemonic (.toCharArray (Normalizer/normalize mnemonic
                                                       java.text.Normalizer$Form/NFKD))
-         passphrase (Normalizer/normalize passphrase
+         passphrase (Normalizer/normalize (or passphrase "")
                                           java.text.Normalizer$Form/NFKD)
          passphrase (str "mnemonic" passphrase)
          passphrase-bytes (StringUtils/getBytes passphrase StandardCharsets/UTF_8)
