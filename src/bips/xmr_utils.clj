@@ -205,7 +205,8 @@
   (sc-reduce32 private-key))
 
 (defn derive-from-mnemonic
-  "Derive from a BIP039 mnemonic seed to a spend key for Monero."
+  "Derive from a BIP039 mnemonic seed using BIP32 path to a spend key for Monero.
+  This means mnemonic phrase -> hex seed -> bip32 private-key -> monero's hexadecimal seed"
   ([mnemonic path key-type & [password]]
    (-> mnemonic
        (bip39/mnemonic->seed password)

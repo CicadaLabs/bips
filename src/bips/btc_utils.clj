@@ -28,7 +28,8 @@
     org.apache.commons.codec.binary.Hex))
 
 (defn derive-from-mnemonic
-  "Derive from a BIP039 mnemonic seed to a spend key for Monero."
+  "Derive from a BIP039 mnemonic seed to a spend key for Bitcoin.
+  This means mnemonic phrase -> hex seed -> bip32 private-key"
   ([mnemonic path key-type & [password]]
    (-> (bip39/mnemonic->seed mnemonic password)
        (bip32/derive-path path key-type)
