@@ -223,3 +223,20 @@
   (-> private-spend-key
       (keccak-256)
       (sc-reduce32)))
+
+(defn gen-keys
+  [seed & [path key-type network-type]]
+  (let [key-type (or key-type :private)
+        path (or path (str "m/44H/128H/0H"))
+        private-spend-key (derive-from-mnemonic seed path key-type)
+        private-view-key (->private-view-key private-spend-key)
+        public-spend-key (->public-key private-spend-key)
+        public-view-key (->public-key private-view-key)
+        primary-address (get-primary-public-address public-spend-key
+                                                    public-view-key
+                                                    (or network-type :testnet))]
+    {:address primary-address
+     :viewkey private-view-key
+     :pub-viewkey public-view-key
+     :spendkey private-spend-key
+     :pub-spendkey public-spend-key}))
